@@ -2,6 +2,7 @@
 export { default as Navbar } from './Navbar'
 export { default as SearchSection } from './SearchSection'
 export { default as ProposalCard } from './ProposalCard'
+export { default as MyProposalCard } from './MyProposalCard'
 export { default as ProposalsList } from './ProposalsList'
 export { default as Pagination } from './Pagination'
 export { default as ProposalHeader } from './ProposalHeader'
