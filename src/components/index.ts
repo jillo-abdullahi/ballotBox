@@ -1,0 +1,10 @@
+// Component exports for cleaner imports
+export { default as Navbar } from './Navbar'
+export { default as SearchSection } from './SearchSection'
+export { default as ProposalCard } from './ProposalCard'
+export { default as ProposalsList } from './ProposalsList'
+export { default as Pagination } from './Pagination'
+export { default as ProposalHeader } from './ProposalHeader'
+export { default as ProposalContent } from './ProposalContent'
+export { default as VotingCard } from './VotingCard'
+export { default as VotingStats } from './VotingStats'
