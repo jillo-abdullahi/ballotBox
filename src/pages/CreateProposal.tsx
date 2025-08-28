@@ -94,7 +94,7 @@ export default function CreateProposal() {
           <div className="space-y-3">
             <label
               htmlFor="description"
-              className="block text-sm font-medium text-neutral-200"
+              className="block text-md font-medium text-neutral-200"
             >
               Short Description *
             </label>
@@ -118,7 +118,7 @@ export default function CreateProposal() {
           <div className="space-y-3">
             <label
               htmlFor="details"
-              className="block text-sm font-medium text-neutral-200"
+              className="block text-md font-medium text-neutral-200"
             >
               Detailed Description
             </label>
@@ -127,7 +127,7 @@ export default function CreateProposal() {
               name="details"
               value={formData.details}
               onChange={handleChange}
-              placeholder="Provide comprehensive details, rationale, implementation plan, and any other relevant information..."
+              placeholder="Provide comprehensive details, rationale, implementation plan, and any other relevant information"
               rows={8}
               className="w-full px-5 py-4 bg-blue-bg/50 border-none text-neutral-100 placeholder-neutral-400 rounded-xl hover:bg-blue-bg/70 focus:bg-blue-bg/20 focus:ring-2 focus:ring-blue-text/20 focus:outline-none transition-all duration-200 resize-vertical"
               maxLength={2000}
@@ -139,7 +139,7 @@ export default function CreateProposal() {
 
           {/* Deadline */}
           <div className="space-y-3">
-            <label className="block text-sm font-medium text-neutral-200">
+            <label className="block text-md font-medium text-neutral-200">
               Voting Deadline *
             </label>
             <div className="grid grid-cols-2 gap-3">

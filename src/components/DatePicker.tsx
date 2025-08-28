@@ -155,9 +155,9 @@ export default function DatePicker({ value, onChange, min, label, required }: Da
             <button
               type="button"
               onClick={() => navigateMonth('prev')}
-              className="p-1.5 hover:bg-blue-text/30 rounded-lg transition-colors"
+              className="p-1.5 hover:bg-blue-text/30 rounded-lg transition-colors cursor-pointer"
             >
-              <FaChevronLeft className="w-3.5 h-3.5 text-neutral-300" />
+              <FaChevronLeft className="w-5 h-5 text-neutral-300" />
             </button>
             
             <h3 className="text-neutral-100 font-medium text-sm">
@@ -167,9 +167,9 @@ export default function DatePicker({ value, onChange, min, label, required }: Da
             <button
               type="button"
               onClick={() => navigateMonth('next')}
-              className="p-1.5 hover:bg-blue-text/30 rounded-lg transition-colors"
+              className="p-1.5 hover:bg-blue-text/30 rounded-lg transition-colors cursor-pointer"
             >
-              <FaChevronRight className="w-3.5 h-3.5 text-neutral-300" />
+              <FaChevronRight className="w-5 h-5 text-neutral-300" />
             </button>
           </div>
 
