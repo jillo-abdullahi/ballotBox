@@ -1,7 +1,7 @@
 import { createRootRoute, createRoute, createRouter, Outlet } from '@tanstack/react-router'
 import HomePage from './pages/HomePage'
 import ProposalPage from './pages/ProposalPage'
-import MyProposals from './pages/MyProposals'
+import CreateProposal from './pages/CreateProposal'
 
 // Create a root route
 const rootRoute = createRootRoute({
@@ -22,15 +22,15 @@ const proposalRoute = createRoute({
   component: ProposalPage,
 })
 
-// Create the my proposals route
-const myProposalsRoute = createRoute({
+// Create the create proposal route
+const createProposalRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/my-proposals',
-  component: MyProposals,
+  path: '/create',
+  component: CreateProposal,
 })
 
 // Create the route tree
-const routeTree = rootRoute.addChildren([indexRoute, proposalRoute, myProposalsRoute])
+const routeTree = rootRoute.addChildren([indexRoute, proposalRoute, createProposalRoute])
 
 // Create the router
 export const router = createRouter({ routeTree })

@@ -1,5 +1,8 @@
 import type { Proposal } from '../types'
 import { formatDate, isProposalOpen } from '../utils'
+import AuthorChip from './AuthorChip'
+import StatusPill from './StatusPill'
+import RelativeTime from './RelativeTime'
 
 interface ProposalContentProps {
   proposal: Proposal
@@ -11,20 +14,14 @@ export default function ProposalContent({ proposal }: ProposalContentProps) {
   return (
     <article className="rounded-2xl border border-neutral-800 bg-neutral-950/40 p-5">
       <div className="flex items-start gap-3">
-        <div className="shrink-0 rounded-full border border-neutral-800 bg-neutral-900 px-3 py-1 text-xs text-neutral-300">
-          {proposal.author}
-        </div>
+        <AuthorChip author={proposal.author} />
         <div className="flex-1 min-w-0">
           <h1 className="text-xl md:text-2xl font-semibold leading-tight">{proposal.title}</h1>
           <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-neutral-400">
             <span>#{proposal.id}</span>
-            <span>Created: {formatDate(proposal.createdAt)}</span>
+            <RelativeTime date={proposal.createdAt} />
             <span>Deadline: {formatDate(proposal.deadline)}</span>
-            <span className={`px-2 py-0.5 rounded-full border ${
-              open
-                ? "border-emerald-700/50 bg-emerald-900/20 text-emerald-300"
-                : "border-neutral-700 bg-neutral-900 text-neutral-400"
-            }`}>{open ? "open" : "closed"}</span>
+            <StatusPill isOpen={open} />
           </div>
 
           <h2 className="mt-5 text-sm uppercase tracking-wide text-neutral-400">Description</h2>

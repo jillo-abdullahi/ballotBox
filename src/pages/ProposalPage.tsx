@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react"
 import { useParams } from "@tanstack/react-router"
 import { MOCK_PROPOSALS } from '../data/mockProposals'
 import { isProposalOpen } from '../utils'
-import ProposalHeader from '../components/ProposalHeader'
+import Navbar from '../components/Navbar'
 import ProposalContent from '../components/ProposalContent'
 import VotingCard from '../components/VotingCard'
 import VotingStats from '../components/VotingStats'
@@ -21,7 +21,7 @@ export default function ProposalPage() {
   if (!proposal) {
     return (
       <div className="min-h-screen bg-neutral-950 text-neutral-100">
-        <ProposalHeader showBackButton />
+        <Navbar />
         <main className="mx-auto max-w-6xl px-4 py-8">
           <div className="rounded-2xl border border-neutral-800 bg-neutral-950/40 p-6">
             <p className="text-red-300">Proposal not found.</p>
@@ -49,11 +49,7 @@ export default function ProposalPage() {
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100">
-      <ProposalHeader 
-        proposalTitle={proposal.title}
-        proposalId={proposal.id}
-        showBackButton
-      />
+      <Navbar />
 
       <main className="mx-auto max-w-6xl px-4 py-8">
         <div className="grid gap-6 md:grid-cols-[1fr,320px]">

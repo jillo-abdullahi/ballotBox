@@ -1,6 +1,9 @@
 import { Link } from "@tanstack/react-router"
 import type { Proposal } from '../types'
 import { formatDate, shareUrl, isProposalOpen, calculateVotingPercentages } from '../utils'
+import AuthorChip from './AuthorChip'
+import StatusPill from './StatusPill'
+import RelativeTime from './RelativeTime'
 
 interface MyProposalCardProps {
   proposal: Proposal
@@ -14,21 +17,11 @@ export default function MyProposalCard({ proposal }: MyProposalCardProps) {
   return (
     <li className="group rounded-2xl border border-neutral-800 bg-neutral-950/40 p-4 md:p-5 hover:border-neutral-700 transition">
       <div className="flex items-start gap-3">
-        <div className="shrink-0 rounded-full border border-neutral-800 bg-neutral-900 px-3 py-1 text-xs text-neutral-300">
-          {proposal.author}
-        </div>
+        <AuthorChip author={proposal.author} />
         <div className="flex-1 min-w-0">
           <div className="flex items-start gap-2">
             <h3 className="font-medium leading-snug">{proposal.title}</h3>
-            <span
-              className={`ml-auto text-xs px-2 py-1 rounded-full border ${
-                open
-                  ? "border-emerald-700/50 bg-emerald-900/20 text-emerald-300"
-                  : "border-neutral-700 bg-neutral-900 text-neutral-400"
-              }`}
-            >
-              {open ? "open" : "closed"}
-            </span>
+            <StatusPill isOpen={open} className="ml-auto" />
           </div>
 
           <p className="mt-1 text-sm text-neutral-300 line-clamp-2">
@@ -37,7 +30,7 @@ export default function MyProposalCard({ proposal }: MyProposalCardProps) {
 
           <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-neutral-400">
             <span>#{proposal.id}</span>
-            <span>Created: {formatDate(proposal.createdAt)}</span>
+            <RelativeTime date={proposal.createdAt} />
             <span>Deadline: {formatDate(proposal.deadline)}</span>
             <span>Yes {proposal.yes} • No {proposal.no}</span>
           </div>
