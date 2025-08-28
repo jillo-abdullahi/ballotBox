@@ -1,5 +1,6 @@
 // Component exports for cleaner imports
 export { default as AuthorChip } from './AuthorChip'
+export { default as DatePicker } from './DatePicker'
 export { default as InfoSection } from './InfoSection'
 export { default as MyProposalCard } from './MyProposalCard'
 export { default as Navbar } from './Navbar'
@@ -10,5 +11,6 @@ export { default as ProposalsList } from './ProposalsList'
 export { default as RelativeTime } from './RelativeTime'
 export { default as SearchSection } from './SearchSection'
 export { default as StatusPill } from './StatusPill'
+export { default as TimePicker } from './TimePicker'
 export { default as VotingCard } from './VotingCard'
 export { default as VotingStats } from './VotingStats'
