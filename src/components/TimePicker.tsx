@@ -17,15 +17,32 @@ export default function TimePicker({
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const [hours, setHours] = useState(
-    value ? parseInt(value.split(":")[0]) : 12
-  );
-  const [minutes, setMinutes] = useState(
-    value ? parseInt(value.split(":")[1]) : 0
-  );
-  const [period, setPeriod] = useState<"AM" | "PM">(
-    value ? (parseInt(value.split(":")[0]) >= 12 ? "PM" : "AM") : "PM"
-  );
+  const [hours, setHours] = useState(() => {
+    if (!value) return 12;
+    const hour24 = parseInt(value.split(":")[0]);
+    return hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
+  });
+  const [minutes, setMinutes] = useState(() => {
+    if (!value) return 0;
+    return parseInt(value.split(":")[1]);
+  });
+  const [period, setPeriod] = useState<"AM" | "PM">(() => {
+    if (!value) return "AM";
+    const hour24 = parseInt(value.split(":")[0]);
+    return hour24 >= 12 ? "PM" : "AM";
+  });
+
+  // Sync internal state when value prop changes
+  useEffect(() => {
+    if (value) {
+      const hour24 = parseInt(value.split(":")[0]);
+      const minute = parseInt(value.split(":")[1]);
+      
+      setHours(hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24);
+      setMinutes(minute);
+      setPeriod(hour24 >= 12 ? "PM" : "AM");
+    }
+  }, [value]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -75,10 +92,6 @@ export default function TimePicker({
       .toString()
       .padStart(2, "0")}`;
     onChange(timeString);
-  };
-
-  const handleApply = () => {
-    setIsOpen(false);
   };
 
   return (

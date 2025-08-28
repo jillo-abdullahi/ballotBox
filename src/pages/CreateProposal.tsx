@@ -144,12 +144,12 @@ export default function CreateProposal() {
             </label>
             <div className="grid grid-cols-2 gap-3">
               <DatePicker
-                value={formData.deadline.split('T')[0] || ''}
+                value={formData.deadline ? (formData.deadline.split('T')[0] || '') : ''}
                 onChange={(date) => {
-                  const time = formData.deadline.split('T')[1] || '12:00';
+                  const timePart = formData.deadline ? (formData.deadline.split('T')[1] || '12:00') : '12:00';
                   setFormData(prev => ({
                     ...prev,
-                    deadline: date ? `${date}T${time}` : ''
+                    deadline: date ? `${date}T${timePart}` : ''
                   }));
                 }}
                 min={new Date().toISOString().split('T')[0]}
@@ -157,18 +157,25 @@ export default function CreateProposal() {
                 required
               />
               <TimePicker
-                value={formData.deadline.split('T')[1] || ''}
+                value={formData.deadline ? (formData.deadline.split('T')[1] || '') : ''}
                 onChange={(time) => {
-                  const date = formData.deadline.split('T')[0];
-                  if (date) {
+                  const datePart = formData.deadline ? formData.deadline.split('T')[0] : '';
+                  if (datePart) {
                     setFormData(prev => ({
                       ...prev,
-                      deadline: `${date}T${time}`
+                      deadline: `${datePart}T${time}`
+                    }));
+                  } else {
+                    // If no date is set, we need a date first
+                    const today = new Date().toISOString().split('T')[0];
+                    setFormData(prev => ({
+                      ...prev,
+                      deadline: `${today}T${time}`
                     }));
                   }
                 }}
                 label="Time"
-                required={!!formData.deadline.split('T')[0]}
+                required={!!(formData.deadline && formData.deadline.split('T')[0])}
               />
             </div>
             <p className="text-xs text-neutral-400">
