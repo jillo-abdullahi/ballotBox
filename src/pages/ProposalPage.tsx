@@ -59,8 +59,6 @@ export default function ProposalPage() {
           {/* Right: actions + stats */}
           <aside className="space-y-6">
             <VotingCard
-              proposalTitle={proposal.title}
-              proposalId={proposal.id}
               isOpen={open}
               onVote={vote}
             />
