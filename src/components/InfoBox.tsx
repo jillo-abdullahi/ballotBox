@@ -3,17 +3,15 @@ import type { ReactNode } from "react";
 interface InfoPillProps {
   label: string;
   children: ReactNode;
-  bgColor?: string;
   textColor?: string;
 }
 
-export default function InfoPill({
+export default function InfoBox({
   label,
   children,
-  bgColor = "bg-teal-text/20",
   textColor = "text-teal-text/80",
 }: InfoPillProps) {
-  const pillStyle = `${bgColor} rounded-full px-8 py-3 flex items-center justify-between`;
+  const pillStyle = `rounded-xl px-8 py-3 flex flex-col items-start justify-center space-y-1`;
   return (
     <div className={pillStyle}>
       <span className={`text-sm ${textColor}`}>{label}</span>

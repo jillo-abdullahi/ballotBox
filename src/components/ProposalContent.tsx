@@ -2,10 +2,8 @@ import { MdLightbulb } from "react-icons/md";
 
 import type { Proposal } from "../types";
 import { formatDate, isProposalOpen } from "../utils";
-import AuthorChip from "./AuthorChip";
-import StatusPill from "./StatusPill";
 import RelativeTime from "./RelativeTime";
-import InfoPill from "./InfoPill";
+import InfoBox from "./InfoBox";
 
 interface ProposalContentProps {
   proposal: Proposal;
@@ -23,47 +21,40 @@ export default function ProposalContent({ proposal }: ProposalContentProps) {
           <span className="text-lg text-teal-text/80 font-medium">
             Proposal #{proposal.id}
           </span>
+
+          {!open ? (
+            <div className="rounded-full px-3 py-1 flex items-center justify-between bg-red-bg ml-2">
+              <span className="text-sm text-red-text">Closed</span>
+            </div>
+          ) : null}
         </div>
         <h1 className="text-3xl md:text-4xl font-bold text-teal-text mb-4">
           {proposal.title}
         </h1>
-        <p className="text-lg text-teal-text mb-6">{proposal.description}</p>
-        <div className="flex items-center justify-start gap-4 text-sm text-teal-text/80">
-          <span>
-            Created <RelativeTime date={proposal.createdAt} />
-          </span>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-2">
+        <p className="text-lg text-teal-text mb-2">{proposal.description}</p>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-2 bg-teal-text/10 p-2 rounded-2xl mt-6">
+          {/* Created at Pill */}
+          <InfoBox label="Created">
+            <span className="text-md text-teal-text font-semibold">
+              <RelativeTime date={proposal.createdAt} />
+            </span>
+          </InfoBox>
+
           {/* Author Pill */}
-          <InfoPill label="Author">
-            <span className="text-sm text-teal-text font-semibold">
+          <InfoBox label="Author">
+            <span className="text-md text-teal-text font-semibold">
               {proposal.author}
             </span>
-          </InfoPill>
+          </InfoBox>
 
           {/* Deadline Pill */}
-          <InfoPill label="Deadline">
-            <span className="text-sm text-teal-text font-semibold">
+          <InfoBox label="Deadline">
+            <span className="text-md text-teal-text font-semibold">
               {formatDate(proposal.deadline)}
             </span>
-          </InfoPill>
-
-          {/* Status Pill */}
-          <InfoPill
-            label="Status"
-            bgColor={open ? "bg-teal-bg/50" : "bg-red-bg/50"}
-            textColor={open ? "text-teal-text" : "text-red-text"}
-          >
-            <span
-              className={`text-sm font-semibold ${
-                open ? "text-teal-text" : "text-red-text"
-              }`}
-            >
-              {open ? "Open" : "Closed"}
-            </span>
-          </InfoPill>
+          </InfoBox>
         </div>
-        
       </section>
 
       {/* Proposal Details */}

@@ -1,7 +1,7 @@
 // Component exports for cleaner imports
 export { default as AuthorChip } from './AuthorChip'
 export { default as DatePicker } from './DatePicker'
-export { default as InfoPill } from './InfoPill'
+export { default as InfoPill } from './InfoBox'
 export { default as InfoSection } from './InfoSection'
 export { default as MyProposalCard } from './MyProposalCard'
 export { default as Navbar } from './Navbar'
