@@ -9,7 +9,7 @@ interface InfoPillProps {
 export default function InfoBox({
   label,
   children,
-  textColor = "text-teal-text/80",
+  textColor = "text-neutral-300",
 }: InfoPillProps) {
   const pillStyle = `rounded-xl px-8 py-3 flex flex-col items-start justify-center space-y-1`;
   return (
