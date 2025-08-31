@@ -9,6 +9,7 @@ import {
 import AuthorChip from "./AuthorChip";
 import StatusPill from "./StatusPill";
 import RelativeTime from "./RelativeTime";
+import MetadataPill from "./MetadataPill";
 
 interface ProposalCardProps {
   proposal: Proposal;
@@ -17,68 +18,98 @@ interface ProposalCardProps {
 export default function ProposalCard({ proposal }: ProposalCardProps) {
   const open = isProposalOpen(proposal.deadline);
   const url = `${window.location.origin}/proposal/${proposal.id}`;
-  const { yesPct } = calculateVotingPercentages(proposal.yes, proposal.no);
+  const { yesPct, noPct } = calculateVotingPercentages(proposal.yes, proposal.no);
 
   return (
-    <li className="group rounded-4xl bg-neutral-800/50 hover:border-neutral-700 transition relative">
+    <li className="group rounded-3xl bg-teal-bg/40 hover:bg-teal-bg/50 transition-all duration-200 relative overflow-hidden">
       <Link
         to="/proposal/$id"
         params={{ id: proposal.id.toString() }}
-        className="block p-4 md:p-6"
+        className="block p-6"
       >
-        <div className="flex items-start gap-3 pr-10">
-          <div className="w-full">
-            {/* author chip */}
-            <AuthorChip author={proposal.author} className="mb-2" />
-            <div className="flex items-start gap-2 w-full">
-              <h3 className="font-medium transition-colors text-gray-200 text-lg md:text-xl">
+        <div className="space-y-4">
+          {/* Header section with title and status */}
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-neutral-100 text-lg leading-tight line-clamp-2">
                 {proposal.title}
               </h3>
-              {/* open/closed pill */}
-              <StatusPill isOpen={open} className="ml-auto" />
+              <p className="mt-2 text-neutral-300 text-sm line-clamp-2 leading-relaxed">
+                {proposal.description}
+              </p>
             </div>
+            <StatusPill isOpen={open} />
+          </div>
 
-            <p className="mt-1 text-sm text-neutral-300 line-clamp-2 leading-wide">
-              {proposal.description}
-            </p>
-            <p className="text-sm text-neutral-400 mt-2">
-              <RelativeTime date={proposal.createdAt} />
-            </p>
+          {/* Metadata pills */}
+          <div className="flex flex-wrap items-center gap-2">
+            <MetadataPill>
+              <div className="flex items-center gap-2">
+                <AuthorChip author={proposal.author} />
+              </div>
+            </MetadataPill>
+            <MetadataPill>
+              <span className="text-xs text-neutral-400 font-medium">
+                <RelativeTime date={proposal.createdAt} />
+              </span>
+            </MetadataPill>
+            <MetadataPill>
+              <span className="text-xs text-neutral-400 font-medium">
+                Ends {formatDate(proposal.deadline)}
+              </span>
+            </MetadataPill>
+          </div>
 
-            {/* meta row */}
-            <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-neutral-400">
-              {/* <span>#{proposal.id}</span> */}
-
-              <span>Deadline {formatDate(proposal.deadline)}</span>
-              <span>
-                Yes {proposal.yes} • No {proposal.no}
+          {/* Voting stats */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-neutral-200 font-medium">Current Results</span>
+              <span className="text-neutral-400 font-medium">
+                {proposal.yes + proposal.no} votes
               </span>
             </div>
-
-            {/* progress bar */}
-            <div className="mt-3 h-2 w-full rounded-full bg-neutral-900 border-none overflow-hidden">
+            
+            {/* Progress bar with dual colors */}
+            <div className="h-3 w-full rounded-full bg-neutral-800/50 overflow-hidden flex">
               <div
-                className="h-full bg-emerald-500 transition-[width] duration-500"
+                className="h-full bg-neutral-400 transition-[width] duration-500"
                 style={{ width: `${yesPct}%` }}
-                title={`${yesPct}% yes`}
+                title={`${yesPct}% yes (${proposal.yes} votes)`}
               />
+              <div
+                className="h-full bg-neutral-600 transition-[width] duration-500"
+                style={{ width: `${noPct}%` }}
+                title={`${noPct}% no (${proposal.no} votes)`}
+              />
+            </div>
+            
+            {/* Vote breakdown */}
+            <div className="flex items-center justify-between text-xs">
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 rounded-full bg-neutral-400"></div>
+                <span className="text-neutral-300">Yes: {proposal.yes} ({yesPct}%)</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 rounded-full bg-neutral-600"></div>
+                <span className="text-neutral-300">No: {proposal.no} ({noPct}%)</span>
+              </div>
             </div>
           </div>
         </div>
       </Link>
 
-      {/* share button - outside of link to prevent nested interaction */}
+      {/* Share button */}
       <button
         onClick={(e) => {
           e.preventDefault();
           shareUrl(url, `Vote on: ${proposal.title}`);
         }}
-        className="absolute top-4 right-4 md:top-6 md:right-6 rounded-xl border border-neutral-800 bg-neutral-900 p-2 text-neutral-300 hover:bg-neutral-800 opacity-0 group-hover:opacity-100 transition-opacity"
+        className="absolute top-4 right-4 rounded-xl bg-neutral-800/50 p-2.5 text-neutral-400 hover:bg-neutral-700/50 hover:text-neutral-200 opacity-0 group-hover:opacity-100 transition-all duration-200"
         title="Share"
       >
         <svg
-          width="18"
-          height="18"
+          width="16"
+          height="16"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"

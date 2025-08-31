@@ -20,9 +20,9 @@ export default function AuthorChip({ author, className = "" }: AuthorChipProps) 
   };
 
   return (
-    <div className={`flex items-center border-none shrink-0 rounded-full bg-neutral-800 pl-2 pr-3 py-1 w-fit ${className}`}>
+    <div className={`flex items-center border-none shrink-0 rounded-full pl-2 pr-3 py-1 w-fit ${className}`}>
       <Jazzicon diameter={10} seed={hashCode(author)} />
-      <span className="ml-2 text-gray-300 font-semibold text-xs">{author}</span>
+      <span className="ml-2 text-neutral-400 font-semibold text-xs">{author}</span>
     </div>
   )
 }
