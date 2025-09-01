@@ -19,7 +19,7 @@ export default function VotingStats({ yesVotes, noVotes }: VotingStatsProps) {
             />
             <div className="absolute inset-0 flex items-center justify-between px-3 text-sm font-medium">
               <span className="text-neutral-200 font-medium">Yes</span>
-              <span className="text-neutral-400">{yesVotes} ({yesPct}%)</span>
+              <span className="text-neutral-200">{yesVotes} ({yesPct}%)</span>
             </div>
           </div>
 
@@ -30,7 +30,7 @@ export default function VotingStats({ yesVotes, noVotes }: VotingStatsProps) {
             />
             <div className="absolute inset-0 flex items-center justify-between px-3 text-sm font-medium">
               <span className="text-teal-text/80 font-medium">No</span>
-              <span className="text-neutral-400">{noVotes} ({noPct}%)</span>
+              <span className="text-neutral-200">{noVotes} ({noPct}%)</span>
             </div>
           </div>
 

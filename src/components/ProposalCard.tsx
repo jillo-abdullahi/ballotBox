@@ -10,6 +10,7 @@ import AuthorChip from "./AuthorChip";
 import StatusPill from "./StatusPill";
 import RelativeTime from "./RelativeTime";
 import MetadataPill from "./MetadataPill";
+import { TbHeartShare } from "react-icons/tb";
 
 interface ProposalCardProps {
   proposal: Proposal;
@@ -18,7 +19,10 @@ interface ProposalCardProps {
 export default function ProposalCard({ proposal }: ProposalCardProps) {
   const open = isProposalOpen(proposal.deadline);
   const url = `${window.location.origin}/proposal/${proposal.id}`;
-  const { yesPct, noPct } = calculateVotingPercentages(proposal.yes, proposal.no);
+  const { yesPct, noPct } = calculateVotingPercentages(
+    proposal.yes,
+    proposal.no
+  );
 
   return (
     <li className="group rounded-3xl bg-teal-bg/50 hover:bg-teal-bg/60 transition-all duration-200 relative overflow-hidden">
@@ -31,14 +35,23 @@ export default function ProposalCard({ proposal }: ProposalCardProps) {
           {/* Header section with title and status */}
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-neutral-100 text-lg leading-tight line-clamp-2">
-                {proposal.title}
+              <h3 className="font-semibold text-neutral-100 text-lg line-clamp-2">
+                {proposal.title} <StatusPill isOpen={open} className="ml-2" />
               </h3>
               <p className="mt-2 text-neutral-300 text-sm line-clamp-2 leading-relaxed">
                 {proposal.description}
               </p>
             </div>
-            <StatusPill isOpen={open} />
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                shareUrl(url, `Vote on: ${proposal.title}`);
+              }}
+              className="cursor-pointer rounded-xl bg-neutral-800/50 p-2.5 text-neutral-400 hover:bg-neutral-700/50 hover:text-neutral-200 transition-all duration-200"
+              title="Share"
+            >
+              <TbHeartShare size={20} className="text-neutral-200" />
+            </button>
           </div>
 
           {/* Metadata pills */}
@@ -63,12 +76,14 @@ export default function ProposalCard({ proposal }: ProposalCardProps) {
           {/* Voting stats */}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-neutral-200 font-medium">Current Results</span>
+              <span className="text-neutral-200 font-medium">
+                Current Results
+              </span>
               <span className="text-neutral-400 font-medium">
                 {proposal.yes + proposal.no} votes
               </span>
             </div>
-            
+
             {/* Progress bar with dual colors */}
             <div className="h-3 w-full rounded-full bg-neutral-800/50 overflow-hidden flex">
               <div
@@ -82,46 +97,25 @@ export default function ProposalCard({ proposal }: ProposalCardProps) {
                 title={`${noPct}% no (${proposal.no} votes)`}
               />
             </div>
-            
+
             {/* Vote breakdown */}
             <div className="flex items-center justify-between text-xs">
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 rounded-full bg-teal-text/40"></div>
-                <span className="text-neutral-300">Yes: {proposal.yes} ({yesPct}%)</span>
+                <span className="text-neutral-300">
+                  Yes: {proposal.yes} ({yesPct}%)
+                </span>
               </div>
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 rounded-full bg-teal-text/20"></div>
-                <span className="text-neutral-300">No: {proposal.no} ({noPct}%)</span>
+                <span className="text-neutral-300">
+                  No: {proposal.no} ({noPct}%)
+                </span>
               </div>
             </div>
           </div>
         </div>
       </Link>
-
-      {/* Share button */}
-      <button
-        onClick={(e) => {
-          e.preventDefault();
-          shareUrl(url, `Vote on: ${proposal.title}`);
-        }}
-        className="absolute top-4 right-4 rounded-xl bg-neutral-800/50 p-2.5 text-neutral-400 hover:bg-neutral-700/50 hover:text-neutral-200 opacity-0 group-hover:opacity-100 transition-all duration-200"
-        title="Share"
-      >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M4 12v7a1 1 0 001 1h7M20 12V5a1 1 0 00-1-1h-7M20 4l-9 9M4 20l9-9"
-          />
-        </svg>
-      </button>
     </li>
   );
 }
