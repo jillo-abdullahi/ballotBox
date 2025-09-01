@@ -1,16 +1,26 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useAccount } from "wagmi";
 import { FaArrowRight } from "react-icons/fa";
-import { Navbar, CustomConnectButton, TransactionModal } from "../components";
+import { Navbar, CustomConnectButton } from "../components";
+import ContractTransactionModal from "../components/ContractTransactionModal";
 import DatePicker from "../components/DatePicker";
 import TimePicker from "../components/TimePicker";
+import { useCreateProposal } from "../hooks/useCreateProposal";
 
 export default function CreateProposal() {
   const navigate = useNavigate();
   const { isConnected } = useAccount();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showTransactionModal, setShowTransactionModal] = useState(false);
+  
+  // Contract interaction hook
+  const {
+    createProposal,
+    isPending,
+    isConfirming,
+    isConfirmed,
+    error: contractError
+  } = useCreateProposal();
 
   // Form state
   const [formData, setFormData] = useState({
@@ -22,41 +32,36 @@ export default function CreateProposal() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isFormValid || isSubmitting) return;
+    if (!isFormValid || isPending || isConfirming) return;
     
     // Show transaction modal instead of directly submitting
     setShowTransactionModal(true);
   };
 
   const handleTransactionConfirm = async () => {
-    setIsSubmitting(true);
-
     try {
-      // TODO: Replace with actual contract call
-      console.log("Creating proposal:", formData);
-
-      // Mock contract call - simulate wallet confirmation and transaction
-      // This would be replaced with actual wagmi contract write
-      await new Promise((resolve, reject) => {
-        setTimeout(() => {
-          // Randomly succeed or fail for demo
-          if (Math.random() > 0.2) {
-            resolve(undefined);
-          } else {
-            reject(new Error("Transaction rejected by user"));
-          }
-        }, 2000);
+      // Call the actual contract function
+      await createProposal({
+        title: formData.title,
+        description: formData.description,
+        details: formData.details,
+        deadline: formData.deadline
       });
-
-      // Navigate back to home after successful creation
-      navigate({ to: "/" });
     } catch (error) {
       console.error("Failed to create proposal:", error);
       throw error; // Re-throw to let modal handle the error state
-    } finally {
-      setIsSubmitting(false);
     }
   };
+
+  // Handle successful transaction confirmation
+  useEffect(() => {
+    if (isConfirmed) {
+      // Navigate back to home after successful creation
+      setTimeout(() => {
+        navigate({ to: "/" });
+      }, 2000); // Give user time to see success state
+    }
+  }, [isConfirmed, navigate]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -308,22 +313,26 @@ export default function CreateProposal() {
             </button>
             <button
               type="submit"
-              disabled={!isFormValid || isSubmitting}
+              disabled={!isFormValid || isPending || isConfirming}
               className="px-8 py-3 cursor-pointer bg-blue-text text-gray-900 rounded-xl hover:bg-blue-text disabled:opacity-80 disabled:cursor-not-allowed transition-colors font-medium flex-1 sm:flex-none flex items-center justify-center gap-2 group"
             >
-              <span>{isSubmitting ? "Creating..." : "Create Proposal"}</span>
+              <span>{isPending || isConfirming ? "Creating..." : "Create Proposal"}</span>
               <FaArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
             </button>
           </div>
         </form>
 
-        {/* Transaction Modal */}
-        <TransactionModal
+        {/* Contract Transaction Modal */}
+        <ContractTransactionModal
           isOpen={showTransactionModal}
           onClose={() => setShowTransactionModal(false)}
           onConfirm={handleTransactionConfirm}
           title="Create Proposal"
           description="You're about to create a new proposal. This will require a transaction to be confirmed in your wallet."
+          isPending={isPending}
+          isConfirming={isConfirming}
+          isConfirmed={isConfirmed}
+          error={contractError}
         />
       </main>
     </div>

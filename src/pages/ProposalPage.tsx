@@ -1,22 +1,83 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import { useParams } from "@tanstack/react-router"
-import { MOCK_PROPOSALS } from '../data/mockProposals'
+import { useReadContract } from 'wagmi'
+import { BALLOTBOX_ADDRESS, BALLOTBOX_ABI } from '../config/contract'
 import { isProposalOpen } from '../utils'
+import { fetchFromIPFS, isIPFSHashSync } from '../utils/ipfs'
 import Navbar from '../components/Navbar'
 import ProposalContent from '../components/ProposalContent'
 import VotingCard from '../components/VotingCard'
 import VotingStats from '../components/VotingStats'
+import type { Proposal } from '../types'
 
 export default function ProposalPage() {
   const { id } = useParams({ from: "/proposal/$id" })
   const pid = Number(id)
-  const proposal = useMemo(() => MOCK_PROPOSALS.find(m => m.id === pid) || null, [pid])
+  const [proposal, setProposal] = useState<Proposal | null>(null)
   const [localVotes, setLocalVotes] = useState<{ yes: number; no: number } | null>(null)
 
+  // Fetch proposal data from contract
+  const { data: contractProposal } = useReadContract({
+    address: BALLOTBOX_ADDRESS,
+    abi: BALLOTBOX_ABI,
+    functionName: 'proposals',
+    args: [BigInt(pid)],
+    query: {
+      enabled: !!pid && pid > 0,
+    }
+  })
+
+  // Process contract data and fetch IPFS content
   useEffect(() => {
-    if (!proposal) return
-    setLocalVotes({ yes: proposal.yes, no: proposal.no })
-  }, [proposal])
+    async function processProposal() {
+      if (!contractProposal) {
+        setProposal(null)
+        return
+      }
+
+      const contract = contractProposal as readonly [bigint, `0x${string}`, bigint, bigint, number, number, boolean, string, string, `0x${string}`]
+      
+      // Check if proposal exists (id > 0)
+      if (Number(contract[0]) === 0) {
+        setProposal(null)
+        return
+      }
+
+      try {
+        let details = ""
+        
+        // If detailsHash is an IPFS hash, fetch the content
+        if (isIPFSHashSync(contract[9])) {
+          try {
+            const ipfsContent = await fetchFromIPFS(contract[9])
+            details = ipfsContent || ""
+          } catch (error) {
+            console.error('Failed to fetch IPFS content:', error)
+          }
+        }
+
+        const processedProposal: Proposal = {
+          id: Number(contract[0]),
+          title: contract[7],
+          description: contract[8],
+          details,
+          author: contract[1],
+          createdAt: contract[4],
+          deadline: contract[5],
+          yes: Number(contract[2]),
+          no: Number(contract[3])
+        }
+        
+        setProposal(processedProposal)
+        setLocalVotes({ yes: processedProposal.yes, no: processedProposal.no })
+      } catch (error) {
+        console.error('Error processing proposal:', error)
+        setProposal(null)
+      }
+    }
+
+    processProposal()
+  }, [contractProposal])
 
   if (!proposal) {
     return (
