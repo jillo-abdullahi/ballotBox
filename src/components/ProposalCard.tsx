@@ -21,7 +21,7 @@ export default function ProposalCard({ proposal }: ProposalCardProps) {
   const { yesPct, noPct } = calculateVotingPercentages(proposal.yes, proposal.no);
 
   return (
-    <li className="group rounded-3xl bg-teal-bg/40 hover:bg-teal-bg/50 transition-all duration-200 relative overflow-hidden">
+    <li className="group rounded-3xl bg-teal-bg/50 hover:bg-teal-bg/60 transition-all duration-200 relative overflow-hidden">
       <Link
         to="/proposal/$id"
         params={{ id: proposal.id.toString() }}
@@ -72,12 +72,12 @@ export default function ProposalCard({ proposal }: ProposalCardProps) {
             {/* Progress bar with dual colors */}
             <div className="h-3 w-full rounded-full bg-neutral-800/50 overflow-hidden flex">
               <div
-                className="h-full bg-neutral-400 transition-[width] duration-500"
+                className="h-full bg-teal-text/50 transition-[width] duration-500"
                 style={{ width: `${yesPct}%` }}
                 title={`${yesPct}% yes (${proposal.yes} votes)`}
               />
               <div
-                className="h-full bg-neutral-600 transition-[width] duration-500"
+                className="h-full bg-teal-text/10 transition-[width] duration-500"
                 style={{ width: `${noPct}%` }}
                 title={`${noPct}% no (${proposal.no} votes)`}
               />
@@ -86,11 +86,11 @@ export default function ProposalCard({ proposal }: ProposalCardProps) {
             {/* Vote breakdown */}
             <div className="flex items-center justify-between text-xs">
               <div className="flex items-center gap-1">
-                <div className="w-2 h-2 rounded-full bg-neutral-400"></div>
+                <div className="w-2 h-2 rounded-full bg-teal-text/40"></div>
                 <span className="text-neutral-300">Yes: {proposal.yes} ({yesPct}%)</span>
               </div>
               <div className="flex items-center gap-1">
-                <div className="w-2 h-2 rounded-full bg-neutral-600"></div>
+                <div className="w-2 h-2 rounded-full bg-teal-text/20"></div>
                 <span className="text-neutral-300">No: {proposal.no} ({noPct}%)</span>
               </div>
             </div>
