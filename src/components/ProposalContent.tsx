@@ -17,16 +17,25 @@ export default function ProposalContent({ proposal }: ProposalContentProps) {
       {/* Title and description section */}
       <header className="bg-teal-bg rounded-3xl p-8">
         <div className="flex justify-start items-center mb-4 space-x-1">
-          <MdLightbulb className="text-lg text-neutral-300" aria-hidden="true" />
+          <MdLightbulb
+            className="text-lg text-neutral-300"
+            aria-hidden="true"
+          />
           <span className="text-lg text-neutral-300 font-medium">
             Proposal #{proposal.id}
           </span>
 
-          {!open && (
-            <div className="rounded-full px-3 py-1 flex items-center justify-between bg-red-bg ml-2">
-              <span className="text-sm text-red-text">Closed</span>
-            </div>
-          )}
+          <div
+            className={`rounded-full px-3 py-1 flex items-center justify-between ml-2 ${
+              open ? "bg-blue-bg" : "bg-red-bg"
+            }`}
+          >
+            <span
+              className={`text-sm ${open ? "text-blue-text" : "text-red-text"}`}
+            >
+              {open ? "Open" : "Closed"}
+            </span>
+          </div>
         </div>
         <h1 className="text-3xl md:text-4xl font-bold text-neutral-300 mb-4">
           {proposal.title}
@@ -35,7 +44,10 @@ export default function ProposalContent({ proposal }: ProposalContentProps) {
       </header>
 
       {/* Details boxes for proposal metadata */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-3 bg-teal-bg p-2 rounded-3xl" aria-label="Proposal metadata">
+      <section
+        className="grid grid-cols-1 md:grid-cols-3 gap-3 bg-teal-bg p-2 rounded-3xl"
+        aria-label="Proposal metadata"
+      >
         <InfoBox label="Created">
           <span className="text-md text-neutral-300 font-semibold">
             <RelativeTime date={proposal.createdAt} />
@@ -57,7 +69,10 @@ export default function ProposalContent({ proposal }: ProposalContentProps) {
 
       {/* Proposal Details */}
       {proposal.details && (
-        <section className="bg-teal-bg rounded-3xl p-8 whitespace-pre-line text-neutral-300" aria-label="Additional proposal details">
+        <section
+          className="bg-teal-bg rounded-3xl p-8 whitespace-pre-line text-neutral-300"
+          aria-label="Additional proposal details"
+        >
           <h2 className="sr-only">Additional Details</h2>
           {proposal.details}
         </section>

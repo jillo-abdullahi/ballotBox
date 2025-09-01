@@ -18,6 +18,7 @@ interface ProposalCardProps {
 
 export default function ProposalCard({ proposal }: ProposalCardProps) {
   const open = isProposalOpen(proposal.deadline);
+
   const url = `${window.location.origin}/proposal/${proposal.id}`;
   const { yesPct, noPct } = calculateVotingPercentages(
     proposal.yes,
