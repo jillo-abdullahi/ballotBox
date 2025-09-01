@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { useAccount } from "wagmi";
 import { FaArrowRight } from "react-icons/fa";
-import { Navbar } from "../components";
+import { Navbar, CustomConnectButton } from "../components";
 import DatePicker from "../components/DatePicker";
 import TimePicker from "../components/TimePicker";
 
 export default function CreateProposal() {
   const navigate = useNavigate();
+  const { isConnected } = useAccount();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form state
@@ -50,11 +52,75 @@ export default function CreateProposal() {
   const isFormValid =
     formData.title.trim() && formData.description.trim() && formData.deadline;
 
+  // If wallet is not connected, show connection prompt
+  if (!isConnected) {
+    return (
+      <div className="min-h-screen bg-neutral-950 text-neutral-100">
+        <Navbar />
+
+        <main className="mx-auto max-w-6xl px-4 py-8">
+          <div className="mb-8 bg-blue-bg px-8 py-6 rounded-3xl">
+            <h1 className="text-3xl md:text-4xl font-bold mb-2 text-blue-text">
+              Create New Proposal
+            </h1>
+            <p className="text-blue-text text-lg">
+              Submit your idea to the community for voting. Make sure to provide
+              clear details and reasoning.
+            </p>
+          </div>
+
+          {/* Wallet Connection Prompt */}
+          <div className="max-w-lg mx-auto text-center py-6">
+            <div className="bg-blue-bg/50 rounded-3xl p-8 border border-blue-text/10">
+              <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-blue-text/10 flex items-center justify-center">
+                <svg
+                  className="w-8 h-8 text-blue-text"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+                  />
+                </svg>
+              </div>
+              
+              <h2 className="text-2xl font-bold mb-4 text-blue-text">
+                Connect Your Wallet
+              </h2>
+              
+              <p className="text-neutral-300 mb-8 leading-relaxed">
+                You need to connect your wallet to create proposals. This ensures
+                that only verified users can submit proposals to the community.
+              </p>
+
+              <div className="flex justify-center">
+                <CustomConnectButton />
+              </div>
+
+              <div className="mt-6 pt-6 border-t border-neutral-700/50">
+                <button
+                  onClick={() => navigate({ to: "/" })}
+                  className="cursor-pointer text-neutral-400 hover:text-neutral-200 transition-colors text-sm"
+                >
+                  ← Back to proposals
+                </button>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100">
       <Navbar />
 
-      <main className="mx-auto max-w-4xl px-4 py-8">
+      <main className="mx-auto max-w-6xl px-4 py-8">
         <div className="mb-8 bg-blue-bg px-8 py-6 rounded-3xl">
           <h1 className="text-3xl md:text-4xl font-bold mb-2 text-blue-text">
             Create New Proposal
@@ -217,7 +283,7 @@ export default function CreateProposal() {
             <button
               type="button"
               onClick={() => navigate({ to: "/" })}
-              className="px-6 py-3 cursor-pointer bg-neutral-800 text-neutral-200 rounded-xl hover:bg-neutral-700 transition-colors font-medium"
+              className="px-6 py-3 cursor-pointer bg-neutral-900 text-neutral-200 rounded-xl hover:bg-neutral-800 transition-colors font-medium"
             >
               Cancel
             </button>

@@ -1,6 +1,10 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { shareUrl } from "../utils";
 import CustomConnectButton from "./CustomConnectButton";
+import { TbHeartShare } from "react-icons/tb";
+import { IoArrowBack } from "react-icons/io5";
+
+
 
 export default function Navbar() {
   const router = useRouterState();
@@ -37,9 +41,10 @@ export default function Navbar() {
           {isProposalPage && (
             <Link
               to="/"
-              className="rounded-xl bg-blue-bg/50 px-5 py-3 text-sm text-blue-text hover:bg-blue-bg/70 focus:bg-blue-bg/20 focus:ring-2 focus:ring-blue-text/20 focus:outline-none transition-all duration-200 font-medium"
+              className="flex items-center cursor-pointer rounded-xl bg-blue-bg/50 px-5 py-3 text-sm text-blue-text hover:bg-blue-bg/70 focus:bg-blue-bg/20 focus:ring-2 focus:ring-blue-text/20 focus:outline-none transition-all duration-200 font-medium"
             >
-              ← Back
+              <IoArrowBack size={16} className="inline mr-2" />
+              <span>Back</span>
             </Link>
           )}
 
@@ -47,10 +52,11 @@ export default function Navbar() {
           {isProposalPage && (
             <button
               onClick={handleShare}
-              className="rounded-xl bg-blue-bg/50 px-5 py-3 text-sm text-blue-text hover:bg-blue-bg/70 focus:bg-blue-bg/20 focus:ring-2 focus:ring-blue-text/20 focus:outline-none transition-all duration-200 font-medium"
+              className="flex items-center cursor-pointer rounded-xl bg-blue-bg/50 px-5 py-3 text-sm text-blue-text hover:bg-blue-bg/70 focus:bg-blue-bg/20 focus:ring-2 focus:ring-blue-text/20 focus:outline-none transition-all duration-200 font-medium"
               title="Share proposal"
             >
-              Share
+              <TbHeartShare size={16} className="inline mr-2" />
+              <span>Share</span>
             </button>
           )}
 
