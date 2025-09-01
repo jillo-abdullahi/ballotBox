@@ -4,6 +4,7 @@ import type { Proposal } from "../types";
 import { formatDate, isProposalOpen } from "../utils";
 import RelativeTime from "./RelativeTime";
 import InfoBox from "./InfoBox";
+import AuthorChip from "./AuthorChip";
 
 interface ProposalContentProps {
   proposal: Proposal;
@@ -55,9 +56,11 @@ export default function ProposalContent({ proposal }: ProposalContentProps) {
         </InfoBox>
 
         <InfoBox label="Author">
-          <span className="text-md text-neutral-300 font-semibold">
-            {proposal.author}
-          </span>
+          <AuthorChip
+            author={proposal.author}
+            className="text-md text-neutral-300 font-semibold ml-2"
+            iconDiameter={16}
+          />
         </InfoBox>
 
         <InfoBox label="Deadline">
