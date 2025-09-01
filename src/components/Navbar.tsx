@@ -1,5 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { shareUrl } from "../utils";
+import CustomConnectButton from "./CustomConnectButton";
 
 export default function Navbar() {
   const router = useRouterState();
@@ -63,13 +64,8 @@ export default function Navbar() {
             </Link>
           )}
 
-          {/* Mock wallet connection */}
-          <button
-            className="rounded-xl bg-blue-text/10 border border-blue-text/20 px-5 py-3 text-sm text-blue-text hover:bg-blue-text/20 focus:bg-blue-text/5 focus:ring-2 focus:ring-blue-text/20 focus:outline-none transition-all duration-200 font-medium"
-            title="Connected wallet (mock)"
-          >
-            0x…a1b
-          </button>
+          {/* RainbowKit wallet connection */}
+          <CustomConnectButton />
         </nav>
       </div>
     </header>

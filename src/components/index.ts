@@ -1,5 +1,6 @@
 // Component exports
 export { default as AuthorChip } from "./AuthorChip";
+export { default as CustomConnectButton } from "./CustomConnectButton";
 export { default as DatePicker } from "./DatePicker";
 export { default as InfoBox } from "./InfoBox";
 export { default as InfoSection } from "./InfoSection";
