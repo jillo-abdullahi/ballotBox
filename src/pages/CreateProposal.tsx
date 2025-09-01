@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useAccount } from "wagmi";
 import { FaArrowRight } from "react-icons/fa";
-import { Navbar, CustomConnectButton } from "../components";
+import { Navbar, CustomConnectButton, TransactionModal } from "../components";
 import DatePicker from "../components/DatePicker";
 import TimePicker from "../components/TimePicker";
 
@@ -10,6 +10,7 @@ export default function CreateProposal() {
   const navigate = useNavigate();
   const { isConnected } = useAccount();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showTransactionModal, setShowTransactionModal] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -21,19 +22,37 @@ export default function CreateProposal() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isFormValid || isSubmitting) return;
+    
+    // Show transaction modal instead of directly submitting
+    setShowTransactionModal(true);
+  };
+
+  const handleTransactionConfirm = async () => {
     setIsSubmitting(true);
 
     try {
-      // TODO: Replace with actual proposal creation logic
+      // TODO: Replace with actual contract call
       console.log("Creating proposal:", formData);
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Mock contract call - simulate wallet confirmation and transaction
+      // This would be replaced with actual wagmi contract write
+      await new Promise((resolve, reject) => {
+        setTimeout(() => {
+          // Randomly succeed or fail for demo
+          if (Math.random() > 0.2) {
+            resolve(undefined);
+          } else {
+            reject(new Error("Transaction rejected by user"));
+          }
+        }, 2000);
+      });
 
       // Navigate back to home after successful creation
       navigate({ to: "/" });
     } catch (error) {
       console.error("Failed to create proposal:", error);
+      throw error; // Re-throw to let modal handle the error state
     } finally {
       setIsSubmitting(false);
     }
@@ -297,6 +316,15 @@ export default function CreateProposal() {
             </button>
           </div>
         </form>
+
+        {/* Transaction Modal */}
+        <TransactionModal
+          isOpen={showTransactionModal}
+          onClose={() => setShowTransactionModal(false)}
+          onConfirm={handleTransactionConfirm}
+          title="Create Proposal"
+          description="You're about to create a new proposal. This will require a transaction to be confirmed in your wallet."
+        />
       </main>
     </div>
   );
