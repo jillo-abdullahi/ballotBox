@@ -24,7 +24,7 @@ export default function ProposalsFilters({
         <select
           value={filterType}
           onChange={(e) => onFilterTypeChange(e.target.value as FilterType)}
-          className="appearance-none bg-neutral-900 border border-neutral-700 rounded-xl px-3 py-2 pr-8 text-sm text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-text focus:border-transparent cursor-pointer min-w-[140px] w-full sm:w-auto"
+          className="appearance-none bg-neutral-900 border border-neutral-800 rounded-xl px-3 py-2 pr-8 text-sm text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-text focus:border-transparent cursor-pointer min-w-[140px] w-full sm:w-auto"
           disabled={!isConnected && filterType === 'my'}
         >
           <option value="all">All Proposals</option>
@@ -73,7 +73,7 @@ export default function ProposalsFilters({
           placeholder="Search proposals..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full pl-10 pr-10 py-2 text-sm bg-neutral-900 border border-neutral-700 rounded-xl text-neutral-100 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-text focus:border-transparent"
+          className="w-full pl-10 pr-10 py-2 text-sm bg-neutral-900 border border-neutral-800 rounded-xl text-neutral-100 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-text focus:border-transparent"
         />
         
         {/* Clear search button */}
