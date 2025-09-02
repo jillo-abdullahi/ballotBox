@@ -4,9 +4,12 @@ import { BALLOTBOX_ADDRESS, BALLOTBOX_ABI } from "../config/contract";
 import Navbar from "../components/Navbar";
 import InfoSection from "../components/InfoSection";
 import ProposalsList from "../components/ProposalsList";
+import ProposalsListSkeleton from "../components/ProposalsListSkeleton";
+import ProposalsFilters, {
+  type FilterType,
+} from "../components/ProposalsFilters";
 import { fetchFromIPFS, getIPFSHashFromBytes32 } from "../utils/ipfs";
 import { useDebounce } from "../hooks/useDebounce";
-import type { FilterType } from "../components/ProposalsFilters";
 
 interface ContractProposal {
   id: bigint;
@@ -40,6 +43,7 @@ export default function HomePage() {
   const [page, setPage] = useState(1);
   const perPage = 6;
   const [proposals, setProposals] = useState<DisplayProposal[]>([]);
+  const [isLoadingProposals, setIsLoadingProposals] = useState(true);
 
   // Filter state
   const [filterType, setFilterType] = useState<FilterType>("all");
@@ -47,7 +51,7 @@ export default function HomePage() {
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   // Fetch total count based on filter type
-  const { data: totalCount } = useReadContract({
+  const { data: totalCount, isLoading: isLoadingCount } = useReadContract({
     address: BALLOTBOX_ADDRESS,
     abi: BALLOTBOX_ABI,
     functionName:
@@ -63,27 +67,31 @@ export default function HomePage() {
   const endIndex = Math.max(0, Number(totalCount || 0) - (page - 1) * perPage);
 
   // Fetch proposals for current page based on filter type
-  const { data: contractProposals } = useReadContract({
-    address: BALLOTBOX_ADDRESS,
-    abi: BALLOTBOX_ABI,
-    functionName:
-      filterType === "all" ? "getProposals" : "getProposalsByAuthor",
-    args:
-      filterType === "all"
-        ? [BigInt(startIndex), BigInt(Math.min(perPage, endIndex - startIndex))]
-        : address
-        ? [
-            address,
-            BigInt(startIndex),
-            BigInt(Math.min(perPage, endIndex - startIndex)),
-          ]
-        : undefined,
-    query: {
-      enabled:
-        (filterType === "all" && !!totalCount && Number(totalCount) > 0) ||
-        (filterType === "my" && !!address && totalCount !== undefined),
-    },
-  });
+  const { data: contractProposals, isLoading: isLoadingContractProposals } =
+    useReadContract({
+      address: BALLOTBOX_ADDRESS,
+      abi: BALLOTBOX_ABI,
+      functionName:
+        filterType === "all" ? "getProposals" : "getProposalsByAuthor",
+      args:
+        filterType === "all"
+          ? [
+              BigInt(startIndex),
+              BigInt(Math.min(perPage, endIndex - startIndex)),
+            ]
+          : address
+          ? [
+              address,
+              BigInt(startIndex),
+              BigInt(Math.min(perPage, endIndex - startIndex)),
+            ]
+          : undefined,
+      query: {
+        enabled:
+          (filterType === "all" && !!totalCount && Number(totalCount) > 0) ||
+          (filterType === "my" && !!address && totalCount !== undefined),
+      },
+    });
 
   // Process contract data and fetch IPFS content
   useEffect(() => {
@@ -92,9 +100,12 @@ export default function HomePage() {
         // If contractProposals is undefined/null and we're on 'my' filter with 0 count, clear proposals
         if (filterType === "my" && Number(totalCount || 0) === 0) {
           setProposals([]);
+          setIsLoadingProposals(false);
         }
         return;
       }
+
+      setIsLoadingProposals(true);
 
       try {
         const processed = await Promise.all(
@@ -135,9 +146,11 @@ export default function HomePage() {
         // Sort by creation time (newest first)
         processed.sort((a, b) => b.createdAt - a.createdAt);
         setProposals(processed);
+        setIsLoadingProposals(false);
       } catch (error) {
         console.error("Error processing proposals:", error);
         setProposals([]);
+        setIsLoadingProposals(false);
       }
     }
 
@@ -164,6 +177,7 @@ export default function HomePage() {
   // Reset to page 1 when filter changes
   useEffect(() => {
     setPage(1);
+    setIsLoadingProposals(true);
   }, [filterType, debouncedSearchQuery]);
 
   // Reset to 'all' filter if wallet disconnects and user was on 'my' filter
@@ -210,6 +224,10 @@ export default function HomePage() {
     ? Math.max(1, Math.ceil(filteredProposals.length / perPage))
     : pageCount;
 
+  // Determine if we should show loading state
+  const isLoading =
+    isLoadingCount || isLoadingContractProposals || isLoadingProposals;
+
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 w-full">
       <Navbar />
@@ -218,17 +236,52 @@ export default function HomePage() {
       <main className="mx-auto max-w-6xl px-4 py-8 space-y-8">
         <InfoSection />
 
-        <ProposalsList
-          proposals={paginatedProposals}
-          totalCount={displayedCount}
-          currentPage={page}
-          totalPages={finalPageCount}
-          onPageChange={setPage}
-          filterType={filterType}
-          onFilterTypeChange={setFilterType}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-        />
+        {/* Proposals section with persistent header and filters */}
+        <section className="space-y-4">
+          {/* Header with title and filters - always visible */}
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <h2 className="text-lg font-medium">
+              {filterType === "my" ? "My proposals" : "Recent proposals"}
+            </h2>
+
+            {/* Filters */}
+            <div className="flex justify-end">
+              <ProposalsFilters
+                filterType={filterType}
+                onFilterTypeChange={setFilterType}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+              />
+            </div>
+          </div>
+
+          {/* Count display - always visible */}
+          <div className="flex items-center">
+            <span className="text-sm font-medium text-blue-text bg-blue-bg px-3 py-1.5 rounded-xl border border-blue-text/10">
+              {isLoading ? (
+                <div className="animate-pulse flex items-center justify-center w-24 h-4" />
+              ) : (
+                `${displayedCount} ${
+                  displayedCount === 1 ? "proposal" : "proposals"
+                } found`
+              )}
+            </span>
+          </div>
+
+          {/* Proposals list content */}
+          {isLoading ? (
+            <ProposalsListSkeleton />
+          ) : (
+            <ProposalsList
+              proposals={paginatedProposals}
+              currentPage={page}
+              totalPages={finalPageCount}
+              onPageChange={setPage}
+              filterType={filterType}
+              searchQuery={debouncedSearchQuery}
+            />
+          )}
+        </section>
       </main>
     </div>
   );
