@@ -9,6 +9,7 @@ import Navbar from '../components/Navbar'
 import ProposalContent from '../components/ProposalContent'
 import VotingCard from '../components/VotingCard'
 import VotingStats from '../components/VotingStats'
+import ContractTransactionModal from '../components/ContractTransactionModal'
 import type { Proposal } from '../types'
 
 export default function ProposalPage() {
@@ -16,6 +17,8 @@ export default function ProposalPage() {
   const pid = Number(id)
   const [proposal, setProposal] = useState<Proposal | null>(null)
   const [localVotes, setLocalVotes] = useState<{ yes: number; no: number } | null>(null)
+  const [showVoteModal, setShowVoteModal] = useState(false)
+  const [pendingVote, setPendingVote] = useState<boolean | null>(null) // true = yes, false = no
 
   // Voting hook
   const {
@@ -25,6 +28,7 @@ export default function ProposalPage() {
     isConfirmed: isVoteConfirmed,
     hasVoted,
     userVote,
+    error: voteError,
     refetchVoteStatus,
     isConnected
   } = useVoting(pid)
@@ -117,22 +121,32 @@ export default function ProposalPage() {
   const yes = localVotes?.yes ?? proposal.yes
   const no = localVotes?.no ?? proposal.no
 
-  async function vote(kind: "yes" | "no") {
+  function vote(kind: "yes" | "no") {
     if (!proposal) return
     
+    // Set the pending vote and show modal
+    setPendingVote(kind === "yes")
+    setShowVoteModal(true)
+  }
+
+  const handleVoteConfirm = async () => {
+    if (pendingVote === null) return
+    
     try {
-      await submitVote(kind === "yes")
-      // Optimistic UI update while transaction is pending
-      setLocalVotes(v => {
-        const base = v ?? { yes: proposal.yes, no: proposal.no }
-        return { 
-          yes: base.yes + (kind === "yes" ? 1 : 0), 
-          no: base.no + (kind === "no" ? 1 : 0) 
-        }
-      })
+      await submitVote(pendingVote)
+      // Optimistic UI update
+      if (proposal) {
+        setLocalVotes(v => {
+          const base = v ?? { yes: proposal.yes, no: proposal.no }
+          return { 
+            yes: base.yes + (pendingVote ? 1 : 0), 
+            no: base.no + (!pendingVote ? 1 : 0) 
+          }
+        })
+      }
     } catch (error) {
       console.error('Vote failed:', error)
-      // TODO: show a toast or error message here
+      throw error // Re-throw to let modal handle the error state
     }
   }
 
@@ -152,13 +166,27 @@ export default function ProposalPage() {
               onVote={vote}
               hasVoted={hasVoted}
               userVote={userVote}
-              isLoading={isVotePending || isVoteConfirming}
               isConnected={isConnected}
             />
             
             <VotingStats yesVotes={yes} noVotes={no} />
           </aside>
         </div>
+
+        {/* Vote Transaction Modal */}
+        <ContractTransactionModal
+          isOpen={showVoteModal}
+          onClose={() => setShowVoteModal(false)}
+          onConfirm={handleVoteConfirm}
+          title={pendingVote ? "Vote Yes" : "Vote No"}
+          description={`You're about to vote "${pendingVote ? "Yes" : "No"}" on this proposal. This will require a transaction to be confirmed in your wallet.`}
+          successTitle="Vote Submitted!"
+          successDescription={`Your "${pendingVote ? "Yes" : "No"}" vote has been successfully recorded on the blockchain.`}
+          isPending={isVotePending}
+          isConfirming={isVoteConfirming}
+          isConfirmed={isVoteConfirmed}
+          error={voteError}
+        />
       </main>
     </div>
   )

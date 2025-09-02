@@ -8,6 +8,8 @@ interface ContractTransactionModalProps {
   onConfirm: () => Promise<void>;
   title: string;
   description: string;
+  successTitle?: string;
+  successDescription?: string;
   isPending: boolean;
   isConfirming: boolean;
   isConfirmed: boolean;
@@ -20,6 +22,8 @@ export default function ContractTransactionModal({
   onConfirm,
   title,
   description,
+  successTitle = "Transaction Successful!",
+  successDescription = "Your transaction has been completed successfully and is now confirmed on the blockchain.",
   isPending,
   isConfirming,
   isConfirmed,
@@ -147,9 +151,9 @@ export default function ContractTransactionModal({
           
           {currentState === 'success' && (
             <>
-              <h3 className="text-xl font-bold text-green-500 mb-4">Transaction Successful!</h3>
+              <h3 className="text-xl font-bold text-green-500 mb-4">{successTitle}</h3>
               <p className="text-neutral-300 mb-8 leading-relaxed">
-                Your proposal has been created successfully and is now live on the blockchain.
+                {successDescription}
               </p>
             </>
           )}

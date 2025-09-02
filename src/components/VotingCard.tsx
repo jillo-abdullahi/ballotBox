@@ -3,7 +3,6 @@ interface VotingCardProps {
   onVote: (vote: "yes" | "no") => void;
   hasVoted?: boolean;
   userVote?: boolean | null; // true = yes, false = no, null = not voted
-  isLoading?: boolean;
   isConnected?: boolean;
 }
 
@@ -12,11 +11,9 @@ export default function VotingCard({
   onVote, 
   hasVoted = false, 
   userVote = null, 
-  isLoading = false,
   isConnected = true 
 }: VotingCardProps) {
   const getButtonText = (vote: "yes" | "no") => {
-    if (isLoading) return vote === "yes" ? "Voting..." : "Voting...";
     if (hasVoted && userVote !== null) {
       if ((vote === "yes" && userVote) || (vote === "no" && !userVote)) {
         return vote === "yes" ? "✓ Yes!" : "✓ No!";
@@ -47,7 +44,7 @@ export default function VotingCard({
     }
   };
 
-  const isDisabled = !isOpen || hasVoted || isLoading || !isConnected;
+  const isDisabled = !isOpen || hasVoted || !isConnected;
 
   return (
     <div className="rounded-3xl border-none bg-neutral-950/40 p-8 bg-teal-bg">
@@ -95,9 +92,7 @@ export default function VotingCard({
           ? "Connect your wallet to vote" 
           : hasVoted 
             ? "You have already voted on this proposal" 
-            : isLoading 
-              ? "Processing your vote..." 
-              : `Voting is ${isOpen ? "open until the deadline." : "closed."}`
+            : `Voting is ${isOpen ? "open until the deadline." : "closed."}`
         }
       </p>
     </div>
