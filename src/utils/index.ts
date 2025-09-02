@@ -18,7 +18,13 @@ export const isProposalOpen = (deadline: number) => Date.now() / 1000 <= deadlin
 
 // Calculate voting percentages
 export const calculateVotingPercentages = (yes: number, no: number) => {
-  const total = Math.max(yes + no, 1)
+  const total = yes + no
+  
+  // If no votes yet, show 0% for both
+  if (total === 0) {
+    return { yesPct: 0, noPct: 0, total: 0 }
+  }
+  
   const yesPct = Math.round((yes / total) * 100)
   const noPct = 100 - yesPct
   return { yesPct, noPct, total }
