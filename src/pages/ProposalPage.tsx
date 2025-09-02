@@ -10,6 +10,7 @@ import ProposalContent from "../components/ProposalContent";
 import VotingCard from "../components/VotingCard";
 import VotingStats from "../components/VotingStats";
 import VoteModal from "../components/VoteModal";
+import ProposalSkeleton from "../components/ProposalSkeleton";
 import type { Proposal } from "../types";
 
 export default function ProposalPage() {
@@ -23,6 +24,8 @@ export default function ProposalPage() {
   } | null>(null);
   const [showVoteModal, setShowVoteModal] = useState(false);
   const [pendingVote, setPendingVote] = useState<boolean | null>(null); // true = yes, false = no
+  const [isLoading, setIsLoading] = useState(true);
+  const [proposalNotFound, setProposalNotFound] = useState(false);
 
   // Only need voting hook for checking vote status, not for submitting votes
   const {
@@ -33,7 +36,7 @@ export default function ProposalPage() {
   } = useVoting(pid);
 
     // Fetch proposal data from contract
-  const { data: contractProposal, refetch: refetchProposal } = useReadContract({
+  const { data: contractProposal, isLoading: isContractLoading, refetch: refetchProposal } = useReadContract({
     address: BALLOTBOX_ADDRESS,
     abi: BALLOTBOX_ABI,
     functionName: "proposals",
@@ -47,9 +50,16 @@ export default function ProposalPage() {
   useEffect(() => {
     async function processProposal() {
       if (!contractProposal) {
-        setProposal(null);
+        // Only set as not found if we have explicitly received data but no proposal
+        if (contractProposal === null) {
+          setProposalNotFound(true);
+          setIsLoading(false);
+        }
         return;
       }
+
+      setIsLoading(true);
+      setProposalNotFound(false);
 
       const contract = contractProposal as readonly [
         bigint,
@@ -67,6 +77,8 @@ export default function ProposalPage() {
       // Check if proposal exists (id > 0)
       if (Number(contract[0]) === 0) {
         setProposal(null);
+        setProposalNotFound(true);
+        setIsLoading(false);
         return;
       }
 
@@ -106,9 +118,12 @@ export default function ProposalPage() {
 
         setProposal(processedProposal);
         setLocalVotes({ yes: processedProposal.yes, no: processedProposal.no });
+        setIsLoading(false);
       } catch (error) {
         console.error("Error processing proposal:", error);
         setProposal(null);
+        setProposalNotFound(true);
+        setIsLoading(false);
       }
     }
 
@@ -121,7 +136,18 @@ export default function ProposalPage() {
     setPendingVote(null);
   }, [address]); // Reset when address changes
 
-  if (!proposal) {
+  // Show loading skeleton while fetching data
+  if (isLoading || isContractLoading) {
+    return (
+      <>
+        <Navbar />
+        <ProposalSkeleton />
+      </>
+    );
+  }
+
+  // Show not found message only after we've determined the proposal doesn't exist
+  if (proposalNotFound || !proposal) {
     return (
       <div className="min-h-screen bg-neutral-950 text-neutral-100">
         <Navbar />
