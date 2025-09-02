@@ -16,6 +16,5 @@ export { default as RelativeTime } from "./RelativeTime";
 export { default as SearchSection } from "./SearchSection";
 export { default as StatusPill } from "./StatusPill";
 export { default as TimePicker } from "./TimePicker";
-export { default as TransactionModal } from "./TransactionModal";
 export { default as VotingCard } from "./VotingCard";
 export { default as VotingStats } from "./VotingStats";

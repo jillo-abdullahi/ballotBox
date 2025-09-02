@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "@tanstack/react-router";
-import { useReadContract } from "wagmi";
+import { useReadContract, useAccount } from "wagmi";
 import { BALLOTBOX_ADDRESS, BALLOTBOX_ABI } from "../config/contract";
 import { isProposalOpen } from "../utils";
 import { fetchFromIPFS, getIPFSHashFromBytes32 } from "../utils/ipfs";
@@ -9,12 +9,13 @@ import Navbar from "../components/Navbar";
 import ProposalContent from "../components/ProposalContent";
 import VotingCard from "../components/VotingCard";
 import VotingStats from "../components/VotingStats";
-import ContractTransactionModal from "../components/ContractTransactionModal";
+import VoteModal from "../components/VoteModal";
 import type { Proposal } from "../types";
 
 export default function ProposalPage() {
   const { id } = useParams({ from: "/proposal/$id" });
   const pid = Number(id);
+  const { address } = useAccount();
   const [proposal, setProposal] = useState<Proposal | null>(null);
   const [localVotes, setLocalVotes] = useState<{
     yes: number;
@@ -23,20 +24,15 @@ export default function ProposalPage() {
   const [showVoteModal, setShowVoteModal] = useState(false);
   const [pendingVote, setPendingVote] = useState<boolean | null>(null); // true = yes, false = no
 
-  // Voting hook
+  // Only need voting hook for checking vote status, not for submitting votes
   const {
-    vote: submitVote,
-    isPending: isVotePending,
-    isConfirming: isVoteConfirming,
-    isConfirmed: isVoteConfirmed,
     hasVoted,
     userVote,
-    error: voteError,
     refetchVoteStatus,
     isConnected,
   } = useVoting(pid);
 
-  // Fetch proposal data from contract
+    // Fetch proposal data from contract
   const { data: contractProposal, refetch: refetchProposal } = useReadContract({
     address: BALLOTBOX_ADDRESS,
     abi: BALLOTBOX_ABI,
@@ -119,13 +115,11 @@ export default function ProposalPage() {
     processProposal();
   }, [contractProposal]);
 
-  // Handle vote confirmation - refetch data when vote is confirmed
+  // Reset modal state when wallet account changes
   useEffect(() => {
-    if (isVoteConfirmed) {
-      refetchProposal();
-      refetchVoteStatus();
-    }
-  }, [isVoteConfirmed, refetchProposal, refetchVoteStatus]);
+    setShowVoteModal(false);
+    setPendingVote(null);
+  }, [address]); // Reset when address changes
 
   if (!proposal) {
     return (
@@ -152,25 +146,11 @@ export default function ProposalPage() {
     setShowVoteModal(true);
   }
 
-  const handleVoteConfirm = async () => {
-    if (pendingVote === null) return;
-
-    try {
-      await submitVote(pendingVote);
-      // Optimistic UI update
-      if (proposal) {
-        setLocalVotes((v) => {
-          const base = v ?? { yes: proposal.yes, no: proposal.no };
-          return {
-            yes: base.yes + (pendingVote ? 1 : 0),
-            no: base.no + (!pendingVote ? 1 : 0),
-          };
-        });
-      }
-    } catch (error) {
-      console.error("Vote failed:", error);
-      throw error; // Re-throw to let modal handle the error state
-    }
+  const handleVoteSuccess = () => {
+    // Refresh data when vote is successful
+    setLocalVotes(null);
+    refetchProposal();
+    refetchVoteStatus();
   };
 
   return (
@@ -196,24 +176,16 @@ export default function ProposalPage() {
           </aside>
         </div>
 
-        {/* Vote Transaction Modal */}
-        <ContractTransactionModal
-          isOpen={showVoteModal}
-          onClose={() => setShowVoteModal(false)}
-          onConfirm={handleVoteConfirm}
-          title={pendingVote ? "Vote Yes" : "Vote No"}
-          description={`You're about to vote "${
-            pendingVote ? "Yes" : "No"
-          }" on this proposal. This will require a transaction to be confirmed in your wallet.`}
-          successTitle="Vote Submitted!"
-          successDescription={`Your "${
-            pendingVote ? "Yes" : "No"
-          }" vote has been successfully recorded on the blockchain.`}
-          isPending={isVotePending}
-          isConfirming={isVoteConfirming}
-          isConfirmed={isVoteConfirmed}
-          error={voteError}
-        />
+        {/* Vote Modal */}
+        {showVoteModal && pendingVote !== null && (
+          <VoteModal
+            isOpen={showVoteModal}
+            onClose={() => setShowVoteModal(false)}
+            proposalId={pid}
+            voteValue={pendingVote}
+            onSuccess={handleVoteSuccess}
+          />
+        )}
       </main>
     </div>
   );
