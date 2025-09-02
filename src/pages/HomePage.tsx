@@ -35,25 +35,26 @@ interface DisplayProposal {
 
 export default function HomePage() {
   const { address } = useAccount();
-  
+
   // pagination state
   const [page, setPage] = useState(1);
   const perPage = 6;
   const [proposals, setProposals] = useState<DisplayProposal[]>([]);
-  
+
   // Filter state
-  const [filterType, setFilterType] = useState<FilterType>('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [filterType, setFilterType] = useState<FilterType>("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   // Fetch total count based on filter type
   const { data: totalCount } = useReadContract({
     address: BALLOTBOX_ADDRESS,
     abi: BALLOTBOX_ABI,
-    functionName: filterType === 'all' ? "proposalCount" : "getAuthorProposalCount",
-    args: filterType === 'my' && address ? [address] : undefined,
+    functionName:
+      filterType === "all" ? "proposalCount" : "getAuthorProposalCount",
+    args: filterType === "my" && address ? [address] : undefined,
     query: {
-      enabled: filterType === 'all' || (filterType === 'my' && !!address),
+      enabled: filterType === "all" || (filterType === "my" && !!address),
     },
   });
 
@@ -65,15 +66,22 @@ export default function HomePage() {
   const { data: contractProposals } = useReadContract({
     address: BALLOTBOX_ADDRESS,
     abi: BALLOTBOX_ABI,
-    functionName: filterType === 'all' ? "getProposals" : "getProposalsByAuthor",
-    args: filterType === 'all' 
-      ? [BigInt(startIndex), BigInt(Math.min(perPage, endIndex - startIndex))]
-      : address 
-        ? [address, BigInt(startIndex), BigInt(Math.min(perPage, endIndex - startIndex))]
+    functionName:
+      filterType === "all" ? "getProposals" : "getProposalsByAuthor",
+    args:
+      filterType === "all"
+        ? [BigInt(startIndex), BigInt(Math.min(perPage, endIndex - startIndex))]
+        : address
+        ? [
+            address,
+            BigInt(startIndex),
+            BigInt(Math.min(perPage, endIndex - startIndex)),
+          ]
         : undefined,
     query: {
-      enabled: (filterType === 'all' && !!totalCount && Number(totalCount) > 0) || 
-               (filterType === 'my' && !!address && totalCount !== undefined),
+      enabled:
+        (filterType === "all" && !!totalCount && Number(totalCount) > 0) ||
+        (filterType === "my" && !!address && totalCount !== undefined),
     },
   });
 
@@ -82,7 +90,7 @@ export default function HomePage() {
     async function processProposals() {
       if (!contractProposals) {
         // If contractProposals is undefined/null and we're on 'my' filter with 0 count, clear proposals
-        if (filterType === 'my' && Number(totalCount || 0) === 0) {
+        if (filterType === "my" && Number(totalCount || 0) === 0) {
           setProposals([]);
         }
         return;
@@ -104,11 +112,10 @@ export default function HomePage() {
                   const ipfsContent = await fetchFromIPFS(originalIPFSHash);
                   details = ipfsContent || "";
                 } catch (error) {
-                  console.log("Failed to fetch IPFS content:", error);
+                  console.error("Failed to fetch IPFS content:", error);
                   // Keep empty as fallback
                 }
               }
-
 
               return {
                 id: Number(proposal.id),
@@ -144,12 +151,13 @@ export default function HomePage() {
     }
 
     const query = debouncedSearchQuery.toLowerCase().trim();
-    return proposals.filter(proposal => 
-      proposal.title.toLowerCase().includes(query) ||
-      proposal.description.toLowerCase().includes(query) ||
-      proposal.details?.toLowerCase().includes(query) ||
-      proposal.id.toString().includes(query) ||
-      proposal.author.toLowerCase().includes(query)
+    return proposals.filter(
+      (proposal) =>
+        proposal.title.toLowerCase().includes(query) ||
+        proposal.description.toLowerCase().includes(query) ||
+        proposal.details?.toLowerCase().includes(query) ||
+        proposal.id.toString().includes(query) ||
+        proposal.author.toLowerCase().includes(query)
     );
   }, [proposals, debouncedSearchQuery]);
 
@@ -160,39 +168,47 @@ export default function HomePage() {
 
   // Reset to 'all' filter if wallet disconnects and user was on 'my' filter
   useEffect(() => {
-    if (filterType === 'my' && !address) {
-      setFilterType('all');
+    if (filterType === "my" && !address) {
+      setFilterType("all");
     }
   }, [address, filterType]);
 
   // Reset proposals when address changes and we're on 'my' filter
   useEffect(() => {
-    if (filterType === 'my') {
+    if (filterType === "my") {
       setProposals([]);
     }
   }, [address, filterType]);
 
   const pageCount = Math.max(1, Math.ceil(Number(totalCount || 0) / perPage));
-  const displayedProposals = debouncedSearchQuery ? filteredProposals : proposals;
-  const displayedCount = debouncedSearchQuery ? filteredProposals.length : Number(totalCount || 0);
-  
+  const displayedProposals = debouncedSearchQuery
+    ? filteredProposals
+    : proposals;
+  const displayedCount = debouncedSearchQuery
+    ? filteredProposals.length
+    : Number(totalCount || 0);
+
   // For search results, we need to paginate the filtered results
   const paginatedProposals = useMemo(() => {
     if (!debouncedSearchQuery) {
       return displayedProposals; // Already paginated by contract call
     }
-    
+
     // Paginate filtered results
     const startIdx = (page - 1) * perPage;
     const endIdx = startIdx + perPage;
     return filteredProposals.slice(startIdx, endIdx);
-  }, [debouncedSearchQuery, displayedProposals, filteredProposals, page, perPage]);
-  
-  const finalPageCount = debouncedSearchQuery 
+  }, [
+    debouncedSearchQuery,
+    displayedProposals,
+    filteredProposals,
+    page,
+    perPage,
+  ]);
+
+  const finalPageCount = debouncedSearchQuery
     ? Math.max(1, Math.ceil(filteredProposals.length / perPage))
     : pageCount;
-
-  console.log({ proposals });
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 w-full">

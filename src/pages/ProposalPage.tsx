@@ -28,15 +28,14 @@ export default function ProposalPage() {
   const [proposalNotFound, setProposalNotFound] = useState(false);
 
   // Only need voting hook for checking vote status, not for submitting votes
-  const {
-    hasVoted,
-    userVote,
-    refetchVoteStatus,
-    isConnected,
-  } = useVoting(pid);
+  const { hasVoted, userVote, refetchVoteStatus, isConnected } = useVoting(pid);
 
-    // Fetch proposal data from contract
-  const { data: contractProposal, isLoading: isContractLoading, refetch: refetchProposal } = useReadContract({
+  // Fetch proposal data from contract
+  const {
+    data: contractProposal,
+    isLoading: isContractLoading,
+    refetch: refetchProposal,
+  } = useReadContract({
     address: BALLOTBOX_ADDRESS,
     abi: BALLOTBOX_ABI,
     functionName: "proposals",
@@ -90,18 +89,13 @@ export default function ProposalPage() {
 
         if (originalIPFSHash) {
           try {
-            console.log("Fetching IPFS content for hash:", originalIPFSHash);
             const ipfsContent = await fetchFromIPFS(originalIPFSHash);
             details = ipfsContent || "";
-            console.log(
-              "Successfully fetched IPFS content:",
-              details ? "Content found" : "No content"
-            );
           } catch (error) {
             console.error("Failed to fetch IPFS content:", error);
           }
         } else {
-          console.log("No valid IPFS hash found in detailsHash:", contract[9]);
+          console.error("No valid IPFS hash found in detailsHash:", contract[9]);
         }
 
         const processedProposal: Proposal = {
