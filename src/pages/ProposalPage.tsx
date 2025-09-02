@@ -4,6 +4,7 @@ import { useReadContract } from 'wagmi'
 import { BALLOTBOX_ADDRESS, BALLOTBOX_ABI } from '../config/contract'
 import { isProposalOpen } from '../utils'
 import { fetchFromIPFS, isIPFSHashSync } from '../utils/ipfs'
+import { useVoting } from '../hooks/useVoting'
 import Navbar from '../components/Navbar'
 import ProposalContent from '../components/ProposalContent'
 import VotingCard from '../components/VotingCard'
@@ -16,8 +17,20 @@ export default function ProposalPage() {
   const [proposal, setProposal] = useState<Proposal | null>(null)
   const [localVotes, setLocalVotes] = useState<{ yes: number; no: number } | null>(null)
 
+  // Voting hook
+  const {
+    vote: submitVote,
+    isPending: isVotePending,
+    isConfirming: isVoteConfirming,
+    isConfirmed: isVoteConfirmed,
+    hasVoted,
+    userVote,
+    refetchVoteStatus,
+    isConnected
+  } = useVoting(pid)
+
   // Fetch proposal data from contract
-  const { data: contractProposal } = useReadContract({
+  const { data: contractProposal, refetch: refetchProposal } = useReadContract({
     address: BALLOTBOX_ADDRESS,
     abi: BALLOTBOX_ABI,
     functionName: 'proposals',
@@ -79,6 +92,14 @@ export default function ProposalPage() {
     processProposal()
   }, [contractProposal])
 
+  // Handle vote confirmation - refetch data when vote is confirmed
+  useEffect(() => {
+    if (isVoteConfirmed) {
+      refetchProposal()
+      refetchVoteStatus()
+    }
+  }, [isVoteConfirmed, refetchProposal, refetchVoteStatus])
+
   if (!proposal) {
     return (
       <div className="min-h-screen bg-neutral-950 text-neutral-100">
@@ -96,16 +117,23 @@ export default function ProposalPage() {
   const yes = localVotes?.yes ?? proposal.yes
   const no = localVotes?.no ?? proposal.no
 
-  function vote(kind: "yes" | "no") {
+  async function vote(kind: "yes" | "no") {
     if (!proposal) return
-    // mock optimistic UI
-    setLocalVotes(v => {
-      const base = v ?? { yes: proposal.yes, no: proposal.no }
-      return { 
-        yes: base.yes + (kind === "yes" ? 1 : 0), 
-        no: base.no + (kind === "no" ? 1 : 0) 
-      }
-    })
+    
+    try {
+      await submitVote(kind === "yes")
+      // Optimistic UI update while transaction is pending
+      setLocalVotes(v => {
+        const base = v ?? { yes: proposal.yes, no: proposal.no }
+        return { 
+          yes: base.yes + (kind === "yes" ? 1 : 0), 
+          no: base.no + (kind === "no" ? 1 : 0) 
+        }
+      })
+    } catch (error) {
+      console.error('Vote failed:', error)
+      // TODO: show a toast or error message here
+    }
   }
 
   return (
@@ -118,10 +146,14 @@ export default function ProposalPage() {
           <ProposalContent proposal={proposal} />
 
           {/* Right: actions + stats */}
-          <aside className="space-y-6">
+          <aside className="space-y-2">
             <VotingCard
               isOpen={open}
               onVote={vote}
+              hasVoted={hasVoted}
+              userVote={userVote}
+              isLoading={isVotePending || isVoteConfirming}
+              isConnected={isConnected}
             />
             
             <VotingStats yesVotes={yes} noVotes={no} />

@@ -1,9 +1,54 @@
 interface VotingCardProps {
   isOpen: boolean;
   onVote: (vote: "yes" | "no") => void;
+  hasVoted?: boolean;
+  userVote?: boolean | null; // true = yes, false = no, null = not voted
+  isLoading?: boolean;
+  isConnected?: boolean;
 }
 
-export default function VotingCard({ isOpen, onVote }: VotingCardProps) {
+export default function VotingCard({ 
+  isOpen, 
+  onVote, 
+  hasVoted = false, 
+  userVote = null, 
+  isLoading = false,
+  isConnected = true 
+}: VotingCardProps) {
+  const getButtonText = (vote: "yes" | "no") => {
+    if (isLoading) return vote === "yes" ? "Voting..." : "Voting...";
+    if (hasVoted && userVote !== null) {
+      if ((vote === "yes" && userVote) || (vote === "no" && !userVote)) {
+        return vote === "yes" ? "✓ Yes!" : "✓ No!";
+      }
+    }
+    return vote === "yes" ? "Yes!" : "No!";
+  };
+
+  const getButtonClass = (vote: "yes" | "no") => {
+    const baseClass = "rounded-xl text-lg border-none px-4 py-6 font-semibold transition-colors";
+    const disabledClass = "disabled:cursor-not-allowed disabled:opacity-50";
+    
+    if (hasVoted && userVote !== null) {
+      if ((vote === "yes" && userVote) || (vote === "no" && !userVote)) {
+        // User voted for this option
+        return `${baseClass} ${disabledClass} ${vote === "yes" ? "bg-green-600 text-white" : "bg-red-600 text-white"}`;
+      } else {
+        // User voted for the other option
+        return `${baseClass} ${disabledClass} bg-neutral-700 text-neutral-400`;
+      }
+    }
+    
+    // Default styling
+    if (vote === "yes") {
+      return `${baseClass} ${disabledClass} bg-teal-text/50 text-neutral-200 hover:bg-teal-text/60 cursor-pointer`;
+    } else {
+      return `${baseClass} ${disabledClass} bg-teal-text/10 text-teal-text/80 hover:bg-teal-text/20 cursor-pointer`;
+    }
+  };
+
+  const isDisabled = !isOpen || hasVoted || isLoading || !isConnected;
+
   return (
     <div className="rounded-3xl border-none bg-neutral-950/40 p-8 bg-teal-bg">
       <div className="flex items-center justify-between">
@@ -12,25 +57,48 @@ export default function VotingCard({ isOpen, onVote }: VotingCardProps) {
         </h3>
       </div>
 
+      {!isConnected && (
+        <div className="mt-4 p-4 bg-yellow-900/20 border border-yellow-600/30 rounded-xl">
+          <p className="text-yellow-400 text-sm">
+            Please connect your wallet to vote
+          </p>
+        </div>
+      )}
+
+      {hasVoted && (
+        <div className="mt-4 p-4 bg-blue-900/20 border border-blue-600/30 rounded-xl">
+          <p className="text-blue-400 text-sm">
+            You voted: {userVote ? "Yes" : "No"}
+          </p>
+        </div>
+      )}
+
       <div className="mt-4 grid grid-cols-2 gap-2">
         <button
           onClick={() => onVote("yes")}
-          disabled={!isOpen}
-          className="rounded-xl text-lg border-none bg-teal-text/50 text-neutral-200 px-4 py-6 hover:bg-teal-text/60 disabled:cursor-not-allowed cursor-pointer font-semibold transition-colors"
+          disabled={isDisabled}
+          className={getButtonClass("yes")}
         >
-          Yes!
+          {getButtonText("yes")}
         </button>
         <button
           onClick={() => onVote("no")}
-          disabled={!isOpen}
-          className="text-lg rounded-xl border-none bg-teal-text/10 text-teal-text/80 px-4 py-3 hover:bg-teal-text/20 disabled:cursor-not-allowed cursor-pointer font-semibold transition-colors"
+          disabled={isDisabled}
+          className={getButtonClass("no")}
         >
-          No!
+          {getButtonText("no")}
         </button>
       </div>
 
       <p className="mt-3 text-xs text-neutral-400">
-        Voting is {isOpen ? "open until the deadline." : "closed."}
+        {!isConnected 
+          ? "Connect your wallet to vote" 
+          : hasVoted 
+            ? "You have already voted on this proposal" 
+            : isLoading 
+              ? "Processing your vote..." 
+              : `Voting is ${isOpen ? "open until the deadline." : "closed."}`
+        }
       </p>
     </div>
   );
