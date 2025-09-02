@@ -1,10 +1,12 @@
-import { useState, useEffect } from "react";
-import { useReadContract } from "wagmi";
+import { useState, useEffect, useMemo } from "react";
+import { useReadContract, useAccount } from "wagmi";
 import { BALLOTBOX_ADDRESS, BALLOTBOX_ABI } from "../config/contract";
 import Navbar from "../components/Navbar";
 import InfoSection from "../components/InfoSection";
 import ProposalsList from "../components/ProposalsList";
 import { fetchFromIPFS, getIPFSHashFromBytes32 } from "../utils/ipfs";
+import { useDebounce } from "../hooks/useDebounce";
+import type { FilterType } from "../components/ProposalsFilters";
 
 interface ContractProposal {
   id: bigint;
@@ -32,33 +34,46 @@ interface DisplayProposal {
 }
 
 export default function HomePage() {
+  const { address } = useAccount();
+  
   // pagination state
   const [page, setPage] = useState(1);
   const perPage = 6;
   const [proposals, setProposals] = useState<DisplayProposal[]>([]);
+  
+  // Filter state
+  const [filterType, setFilterType] = useState<FilterType>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
-  // Fetch total count to know how many proposals exist
+  // Fetch total count based on filter type
   const { data: totalCount } = useReadContract({
     address: BALLOTBOX_ADDRESS,
     abi: BALLOTBOX_ABI,
-    functionName: "proposalCount",
+    functionName: filterType === 'all' ? "proposalCount" : "getAuthorProposalCount",
+    args: filterType === 'my' && address ? [address] : undefined,
+    query: {
+      enabled: filterType === 'all' || (filterType === 'my' && !!address),
+    },
   });
 
   // Calculate pagination for contract calls
   const startIndex = Math.max(0, Number(totalCount || 0) - page * perPage);
   const endIndex = Math.max(0, Number(totalCount || 0) - (page - 1) * perPage);
 
-  // Fetch proposals for current page
+  // Fetch proposals for current page based on filter type
   const { data: contractProposals } = useReadContract({
     address: BALLOTBOX_ADDRESS,
     abi: BALLOTBOX_ABI,
-    functionName: "getProposals",
-    args: [
-      BigInt(startIndex),
-      BigInt(Math.min(perPage, endIndex - startIndex)),
-    ],
+    functionName: filterType === 'all' ? "getProposals" : "getProposalsByAuthor",
+    args: filterType === 'all' 
+      ? [BigInt(startIndex), BigInt(Math.min(perPage, endIndex - startIndex))]
+      : address 
+        ? [address, BigInt(startIndex), BigInt(Math.min(perPage, endIndex - startIndex))]
+        : undefined,
     query: {
-      enabled: !!totalCount && Number(totalCount) > 0,
+      enabled: (filterType === 'all' && !!totalCount && Number(totalCount) > 0) || 
+               (filterType === 'my' && !!address && totalCount !== undefined),
     },
   });
 
@@ -66,6 +81,10 @@ export default function HomePage() {
   useEffect(() => {
     async function processProposals() {
       if (!contractProposals) {
+        // If contractProposals is undefined/null and we're on 'my' filter with 0 count, clear proposals
+        if (filterType === 'my' && Number(totalCount || 0) === 0) {
+          setProposals([]);
+        }
         return;
       }
 
@@ -116,9 +135,62 @@ export default function HomePage() {
     }
 
     processProposals();
-  }, [contractProposals]);
+  }, [contractProposals, filterType, totalCount]);
+
+  // Filter proposals based on search query
+  const filteredProposals = useMemo(() => {
+    if (!debouncedSearchQuery.trim()) {
+      return proposals;
+    }
+
+    const query = debouncedSearchQuery.toLowerCase().trim();
+    return proposals.filter(proposal => 
+      proposal.title.toLowerCase().includes(query) ||
+      proposal.description.toLowerCase().includes(query) ||
+      proposal.details?.toLowerCase().includes(query) ||
+      proposal.id.toString().includes(query) ||
+      proposal.author.toLowerCase().includes(query)
+    );
+  }, [proposals, debouncedSearchQuery]);
+
+  // Reset to page 1 when filter changes
+  useEffect(() => {
+    setPage(1);
+  }, [filterType, debouncedSearchQuery]);
+
+  // Reset to 'all' filter if wallet disconnects and user was on 'my' filter
+  useEffect(() => {
+    if (filterType === 'my' && !address) {
+      setFilterType('all');
+    }
+  }, [address, filterType]);
+
+  // Reset proposals when address changes and we're on 'my' filter
+  useEffect(() => {
+    if (filterType === 'my') {
+      setProposals([]);
+    }
+  }, [address, filterType]);
 
   const pageCount = Math.max(1, Math.ceil(Number(totalCount || 0) / perPage));
+  const displayedProposals = debouncedSearchQuery ? filteredProposals : proposals;
+  const displayedCount = debouncedSearchQuery ? filteredProposals.length : Number(totalCount || 0);
+  
+  // For search results, we need to paginate the filtered results
+  const paginatedProposals = useMemo(() => {
+    if (!debouncedSearchQuery) {
+      return displayedProposals; // Already paginated by contract call
+    }
+    
+    // Paginate filtered results
+    const startIdx = (page - 1) * perPage;
+    const endIdx = startIdx + perPage;
+    return filteredProposals.slice(startIdx, endIdx);
+  }, [debouncedSearchQuery, displayedProposals, filteredProposals, page, perPage]);
+  
+  const finalPageCount = debouncedSearchQuery 
+    ? Math.max(1, Math.ceil(filteredProposals.length / perPage))
+    : pageCount;
 
   console.log({ proposals });
 
@@ -131,11 +203,15 @@ export default function HomePage() {
         <InfoSection />
 
         <ProposalsList
-          proposals={proposals}
-          totalCount={Number(totalCount || 0)}
+          proposals={paginatedProposals}
+          totalCount={displayedCount}
           currentPage={page}
-          totalPages={pageCount}
+          totalPages={finalPageCount}
           onPageChange={setPage}
+          filterType={filterType}
+          onFilterTypeChange={setFilterType}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
         />
       </main>
     </div>
