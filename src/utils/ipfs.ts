@@ -1,111 +1,110 @@
-// Utility functions for IPFS operations
-import { createHelia } from 'helia'
-import { strings } from '@helia/strings'
-
-// Singleton Helia instance to avoid creating multiple instances
-let heliaInstance: any = null;
-let stringHeliaInstance: any = null;
+// Utility functions for proposal details storage
+// Simple approach: store short content directly in bytes32, use hash for longer content
 
 /**
- * Get or create a Helia instance
- */
-async function getHelia() {
-  if (!heliaInstance) {
-    heliaInstance = await createHelia();
-    stringHeliaInstance = strings(heliaInstance);
-  }
-  return { helia: heliaInstance, strings: stringHeliaInstance };
-}
-
-/**
- * Upload content to IPFS using Helia
- * @param content The content to upload
- * @returns The IPFS CID as a string
+ * Store content using a simple, direct approach
+ * @param content The content to store
+ * @returns An identifier for the content
  */
 export async function uploadToIPFS(content: string): Promise<string> {
   try {
-    const { strings: stringInstance } = await getHelia();
-    const cid = await stringInstance.add(content);
-    return cid.toString();
+    if (!content || content.trim() === '') {
+      return 'empty';
+    }
+
+    // For short content (< 31 bytes), we can store it directly in bytes32
+    const contentBytes = new TextEncoder().encode(content);
+    
+    if (contentBytes.length <= 31) {
+      // Return the content itself - it will fit in bytes32
+      console.log('Short content, will store directly in bytes32:', content);
+      return `direct:${content}`;
+    }
+
+    // For longer content, create a simple hash and store in localStorage as fallback
+    const hash = generateSimpleHash(content);
+    localStorage.setItem(`content_${hash}`, content);
+    console.log('Long content stored with hash:', hash);
+    
+    return `hash:${hash}`;
   } catch (error) {
-    console.error('Failed to upload to IPFS:', error);
-    throw new Error(`IPFS upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.error('Failed to store content:', error);
+    throw new Error(`Content storage failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
 
 /**
- * Fetch content from IPFS using Helia with fallback to gateway
- * @param ipfsHash The IPFS hash to fetch
+ * Generate a simple hash for content
+ */
+function generateSimpleHash(content: string): string {
+  let hash = 0;
+  for (let i = 0; i < content.length; i++) {
+    const char = content.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return Math.abs(hash).toString(36);
+}
+
+/**
+ * Fetch content using our simple approach
+ * @param identifier The content identifier
  * @returns The content as a string
  */
-export async function fetchFromIPFS(ipfsHash: string): Promise<string> {
-  if (!ipfsHash || ipfsHash.trim() === '') {
+export async function fetchFromIPFS(identifier: string): Promise<string> {
+  if (!identifier || identifier.trim() === '' || identifier === 'empty') {
     return '';
   }
 
-  // Clean the hash (remove ipfs:// prefix if present)
-  const cleanHash = ipfsHash.replace(/^ipfs:\/\//, '');
-  
   try {
-    // First try using Helia for direct IPFS access
-    const { strings: stringInstance } = await getHelia();
-    // Use any type to avoid TypeScript issues with multiformats
-    const { CID } = await import('multiformats/cid') as any;
-    const cid = CID.parse(cleanHash);
-    const content = await stringInstance.get(cid);
-    return content;
-  } catch (heliaError) {
-    console.warn('Failed to fetch from IPFS via Helia, falling back to gateway:', heliaError);
-    
-    // Fallback to Pinata gateway
-    try {
-      const response = await fetch(`https://gateway.pinata.cloud/ipfs/${cleanHash}`, {
-        method: 'GET',
-        headers: {
-          'Accept': 'text/plain,application/json,*/*',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch from IPFS gateway: ${response.status} ${response.statusText}`);
-      }
-
-      const content = await response.text();
+    // Handle direct content storage
+    if (identifier.startsWith('direct:')) {
+      const content = identifier.replace('direct:', '');
+      console.log('Retrieved direct content:', content);
       return content;
-    } catch (gatewayError) {
-      console.error('Failed to fetch from IPFS gateway:', gatewayError);
-      // Return the hash itself as final fallback
-      return ipfsHash;
     }
+
+    // Handle hash-based storage
+    if (identifier.startsWith('hash:')) {
+      const hash = identifier.replace('hash:', '');
+      const content = localStorage.getItem(`content_${hash}`);
+      
+      if (content) {
+        console.log('Retrieved content from localStorage for hash:', hash);
+        return content;
+      } else {
+        console.warn('Content not found in localStorage for hash:', hash);
+        return '';
+      }
+    }
+
+    // Handle legacy formats
+    if (identifier.startsWith('short:') || identifier.startsWith('stored:')) {
+      console.log('Legacy identifier format detected:', identifier);
+      return '';
+    }
+
+    console.warn('Unknown identifier format:', identifier);
+    return '';
+  } catch (error) {
+    console.error('Failed to fetch content:', error);
+    return '';
   }
 }
 
 /**
- * Check if a string looks like an IPFS hash using CID validation
+ * Check if a string is a valid content identifier
  * @param str The string to check
- * @returns True if it looks like an IPFS hash
+ * @returns True if it's a valid identifier
  */
 export async function isIPFSHash(str: string): Promise<boolean> {
-  if (!str) return false;
-  
-  // Clean the string
-  const cleanStr = str.replace(/^ipfs:\/\//, '');
-  
-  try {
-    // Try to parse as CID
-    const { CID } = await import('multiformats/cid') as any;
-    CID.parse(cleanStr);
-    return true;
-  } catch {
-    // If CID parsing fails, fall back to regex patterns
-    return isIPFSHashSync(cleanStr);
-  }
+  return isIPFSHashSync(str);
 }
 
 /**
- * Synchronous version of isIPFSHash for immediate checks
+ * Check if a string is a valid content identifier (synchronous)
  * @param str The string to check
- * @returns True if it looks like an IPFS hash
+ * @returns True if it's a valid identifier
  */
 export function isIPFSHashSync(str: string): boolean {
   if (!str) return false;
@@ -113,26 +112,31 @@ export function isIPFSHashSync(str: string): boolean {
   // Clean the string
   const cleanStr = str.replace(/^ipfs:\/\//, '');
   
-  // Check for common IPFS hash patterns
-  // CID v0: Qm... (46 characters, base58)
-  const cidV0Pattern = /^Qm[1-9A-HJ-NP-Za-km-z]{44}$/;
+  // Check for our storage formats
+  if (cleanStr.startsWith('direct:') || cleanStr.startsWith('hash:')) {
+    return true;
+  }
   
-  // CID v1: various patterns
+  // Check for legacy storage formats
+  if (cleanStr.startsWith('short:') || cleanStr.startsWith('stored:')) {
+    return true;
+  }
+  
+  // Legacy IPFS hash patterns (for backward compatibility)
+  const cidV0Pattern = /^Qm[1-9A-HJ-NP-Za-km-z]{44}$/;
   const cidV1Patterns = [
-    /^bafkrei[a-z0-9]{50}$/, // CIDv1 with sha256 hash (like your example)
-    /^bafyrei[a-z0-9]{50}$/, // Alternative CIDv1 format
-    /^bafkreig[a-z0-9]{49}$/, // Another CIDv1 variant
-    /^bafy[a-z0-9]{55}$/, // Directory CIDv1
-    /^b[a-z2-7]{58,}$/, // General CIDv1 base32
-    /^z[1-9A-HJ-NP-Za-km-z]+$/ // CIDv1 base58btc
+    /^bafkrei[a-z0-9]{50}$/,
+    /^bafyrei[a-z0-9]{50}$/,
+    /^bafkreig[a-z0-9]{49}$/,
+    /^bafy[a-z0-9]{55}$/,
+    /^b[a-z2-7]{58,}$/,
+    /^z[1-9A-HJ-NP-Za-km-z]+$/
   ];
   
-  // Check CID v0
   if (cidV0Pattern.test(cleanStr)) {
     return true;
   }
   
-  // Check CID v1 patterns
   for (const pattern of cidV1Patterns) {
     if (pattern.test(cleanStr)) {
       return true;
@@ -143,41 +147,61 @@ export function isIPFSHashSync(str: string): boolean {
 }
 
 /**
- * Format IPFS hash for display
- * @param hash The IPFS hash
- * @returns Formatted hash for display
+ * Format content identifier for display
+ * @param identifier The content identifier
+ * @returns Formatted identifier for display
  */
-export function formatIPFSHash(hash: string): string {
-  if (!hash) return '';
+export function formatIPFSHash(identifier: string): string {
+  if (!identifier) return '';
   
-  const cleanHash = hash.replace(/^ipfs:\/\//, '');
+  const cleanIdentifier = identifier.replace(/^ipfs:\/\//, '');
   
-  if (cleanHash.length > 20) {
-    return `${cleanHash.substring(0, 10)}...${cleanHash.substring(cleanHash.length - 10)}`;
+  // Handle our storage formats
+  if (cleanIdentifier.startsWith('direct:')) {
+    return 'Direct content';
   }
   
-  return cleanHash;
+  if (cleanIdentifier.startsWith('hash:')) {
+    const hash = cleanIdentifier.replace('hash:', '');
+    return `Content #${hash.substring(0, 8)}`;
+  }
+  
+  // Handle legacy formats
+  if (cleanIdentifier.startsWith('short:')) {
+    return 'Short content';
+  }
+  
+  if (cleanIdentifier.startsWith('stored:')) {
+    const hash = cleanIdentifier.replace('stored:', '');
+    return `Content #${hash.substring(0, 8)}`;
+  }
+  
+  // For other identifiers, show a truncated version
+  if (cleanIdentifier.length > 20) {
+    return `${cleanIdentifier.substring(0, 10)}...${cleanIdentifier.substring(cleanIdentifier.length - 10)}`;
+  }
+  
+  return cleanIdentifier;
 }
 
 /**
- * Retrieve the original IPFS hash from a bytes32 hash stored on the blockchain
- * This function handles the reverse conversion from our storage format
+ * Retrieve content identifier from bytes32 hash stored on blockchain
+ * Simple approach using direct string conversion
  */
 export function getIPFSHashFromBytes32(bytes32Hash: string): string | null {
   if (!bytes32Hash || bytes32Hash === '0x0000000000000000000000000000000000000000000000000000000000000000') {
     return null;
   }
 
-  // First, try to get from localStorage (our mapping approach)
-  const storedHash = localStorage.getItem(`ipfs_hash_${bytes32Hash}`);
-  if (storedHash) {
-    console.log('Retrieved IPFS hash from localStorage:', storedHash);
-    return storedHash;
+  // First, try to get from localStorage mapping (for hash-based content)
+  const storedIdentifier = localStorage.getItem(`content_id_${bytes32Hash}`);
+  if (storedIdentifier) {
+    console.log('Retrieved content identifier from localStorage:', storedIdentifier);
+    return storedIdentifier;
   }
 
-  // Fallback: try to decode the bytes32 back to a string
+  // Try to decode bytes32 to string directly
   try {
-    // Remove '0x' prefix and convert hex to bytes
     const hexString = bytes32Hash.slice(2);
     const bytes = new Uint8Array(32);
     
@@ -185,7 +209,7 @@ export function getIPFSHashFromBytes32(bytes32Hash: string): string | null {
       bytes[i] = parseInt(hexString.slice(i * 2, i * 2 + 2), 16);
     }
     
-    // Find the end of the actual data (before null bytes)
+    // Find actual data length (trim null bytes)
     let actualLength = 32;
     for (let i = 31; i >= 0; i--) {
       if (bytes[i] !== 0) {
@@ -194,25 +218,22 @@ export function getIPFSHashFromBytes32(bytes32Hash: string): string | null {
       }
     }
     
-    // Convert back to string
-    const decoder = new TextDecoder();
-    const hashPart = decoder.decode(bytes.slice(0, actualLength));
-    
-    // Reconstruct the full IPFS hash for CIDv1
-    if (hashPart.length > 0) {
-      const fullHash = `bafkrei${hashPart}`;
-      
-      // Validate the reconstructed hash
-      if (isIPFSHashSync(fullHash)) {
-        console.log('Reconstructed IPFS hash:', fullHash);
-        return fullHash;
-      }
+    if (actualLength === 0) {
+      return null;
     }
     
-    console.warn('Could not reconstruct valid IPFS hash from bytes32:', bytes32Hash);
+    // Convert to string
+    const decoder = new TextDecoder();
+    const decoded = decoder.decode(bytes.slice(0, actualLength));
+    
+    if (decoded && decoded.length > 0) {
+      console.log('Successfully decoded content identifier:', decoded);
+      return decoded;
+    }
+    
     return null;
   } catch (error) {
-    console.error('Error decoding bytes32 to IPFS hash:', error);
+    console.error('Error decoding bytes32 to content identifier:', error);
     return null;
   }
 }

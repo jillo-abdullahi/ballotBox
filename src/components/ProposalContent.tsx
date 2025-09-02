@@ -14,9 +14,6 @@ interface ProposalContentProps {
 export default function ProposalContent({ proposal }: ProposalContentProps) {
   const open = isProposalOpen(proposal.deadline);
 
-
-  console.log("Rendering ProposalContent for proposal:", proposal);
-
   return (
     <article className="space-y-2">
       {/* Title and description section */}

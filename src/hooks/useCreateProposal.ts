@@ -29,51 +29,30 @@ export function useCreateProposal() {
     // Convert ISO date string to Unix timestamp (uint32)
     const deadline = Math.floor(new Date(args.deadline).getTime() / 1000);
     
-    // Upload details to IPFS if there are any details
+    // Store details using our simplified approach
     let detailsHash: `0x${string}` = '0x0000000000000000000000000000000000000000000000000000000000000000';
     if (args.details.trim()) {
       try {
-        const ipfsHash = await uploadToIPFS(args.details);
-        console.log('Details uploaded to IPFS:', ipfsHash);
+        const contentId = await uploadToIPFS(args.details);
+        console.log('Details stored with ID:', contentId);
         
-        // Store the full IPFS hash as bytes32
-        // We'll encode it in a way that we can decode later
-        // For CIDv1 hashes starting with 'bafkrei', we'll store a prefix and hash
-        if (ipfsHash.startsWith('bafkrei')) {
-          // Extract the significant part of the hash for CIDv1
-          // This is a simplified approach - in production you'd want proper CID decoding
-          const hashPart = ipfsHash.slice(7); // Remove 'bafkrei' prefix
-          const encoder = new TextEncoder();
-          const data = encoder.encode(hashPart.slice(0, 28)); // Take first 28 chars to fit in bytes32
-          
-          // Pad to 32 bytes
-          const hashArray = new Uint8Array(32);
-          hashArray.set(data);
-          
-          // Convert to hex string
-          detailsHash = `0x${Array.from(hashArray)
-            .map(b => b.toString(16).padStart(2, '0'))
-            .join('')}` as `0x${string}`;
-        } else {
-          // For other hash formats, use the original approach
-          const encoder = new TextEncoder();
-          const data = encoder.encode(ipfsHash);
-          const hashArray = new Uint8Array(32);
-          
-          // Copy the data, truncating or padding as needed
-          const copyLength = Math.min(data.length, 32);
-          hashArray.set(data.slice(0, copyLength));
-          
-          // Convert to hex string
-          detailsHash = `0x${Array.from(hashArray)
-            .map(b => b.toString(16).padStart(2, '0'))
-            .join('')}` as `0x${string}`;
-        }
+        // Convert content ID to bytes32 for blockchain storage
+        const encoder = new TextEncoder();
+        const data = encoder.encode(contentId);
+        const hashArray = new Uint8Array(32);
         
-        // Store the mapping in localStorage for retrieval
-        // This is a workaround since bytes32 can't store full IPFS hashes
-        localStorage.setItem(`ipfs_hash_${detailsHash}`, ipfsHash);
-        console.log('Stored IPFS mapping:', detailsHash, '->', ipfsHash);
+        // Copy the data, truncating if too long
+        const copyLength = Math.min(data.length, 32);
+        hashArray.set(data.slice(0, copyLength));
+        
+        // Convert to hex string
+        detailsHash = `0x${Array.from(hashArray)
+          .map(b => b.toString(16).padStart(2, '0'))
+          .join('')}` as `0x${string}`;
+        
+        // Store the mapping for retrieval (simplified approach)
+        localStorage.setItem(`content_id_${detailsHash}`, contentId);
+        console.log('Stored content mapping:', detailsHash, '->', contentId);
           
       } catch (uploadError) {
         console.error('IPFS upload failed:', uploadError);
