@@ -93,7 +93,7 @@ export default function ContractTransactionModal({
         {currentState !== 'pending' && currentState !== 'confirming' && (
           <button
             onClick={handleClose}
-            className="absolute top-4 right-4 text-neutral-400 hover:text-neutral-200 transition-colors"
+            className="absolute top-4 right-4 text-neutral-400 hover:text-neutral-200 transition-colors cursor-pointer"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -103,7 +103,7 @@ export default function ContractTransactionModal({
 
         <div className="text-center">
           {/* Icon based on state */}
-          <div className="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center">
+          <div className="w-16 h-16 mx-auto rounded-full flex items-center justify-center">
             {currentState === 'idle' && (
               <CiLock className="absolute w-8 h-8 text-blue-text" />
             )}
@@ -162,7 +162,7 @@ export default function ContractTransactionModal({
             <>
               <h3 className="text-xl font-bold text-red-text mb-4">Transaction Failed</h3>
               <p className="text-neutral-300 mb-8 leading-relaxed">
-                {error?.message || 'The transaction was rejected or failed to process.'}
+                Your transaction could not be completed. This might be due to network issues, insufficient funds, or the transaction was rejected.
               </p>
             </>
           )}
@@ -173,13 +173,13 @@ export default function ContractTransactionModal({
               <>
                 <button
                   onClick={handleClose}
-                  className="px-6 py-3 bg-neutral-700 text-neutral-200 rounded-xl hover:bg-neutral-600 transition-colors font-medium"
+                  className="px-6 py-3 bg-neutral-800 text-neutral-200 rounded-xl hover:bg-neutral-700 transition-colors font-medium cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleConfirm}
-                  className="px-8 py-3 bg-blue-text text-gray-900 rounded-xl hover:bg-blue-text/90 transition-colors font-medium"
+                  className="px-8 py-3 bg-blue-text text-gray-900 rounded-xl hover:bg-blue-text/90 transition-colors font-medium cursor-pointer"
                 >
                   Confirm
                 </button>
@@ -190,13 +190,13 @@ export default function ContractTransactionModal({
               <>
                 <button
                   onClick={handleClose}
-                  className="px-6 py-3 bg-neutral-700 text-neutral-200 rounded-xl hover:bg-neutral-600 transition-colors font-medium"
+                  className="px-6 py-3 bg-neutral-700 text-neutral-200 rounded-xl hover:bg-neutral-600 transition-colors font-medium cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleConfirm}
-                  className="px-8 py-3 bg-blue-text text-gray-900 rounded-xl hover:bg-blue-text/90 transition-colors font-medium"
+                  className="px-8 py-3 bg-blue-text text-gray-900 rounded-xl hover:bg-blue-text/90 transition-colors font-medium cursor-pointer"
                 >
                   Try Again
                 </button>
