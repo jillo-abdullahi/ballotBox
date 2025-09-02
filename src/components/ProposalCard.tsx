@@ -26,7 +26,7 @@ export default function ProposalCard({ proposal }: ProposalCardProps) {
   );
 
   return (
-    <li className="group rounded-3xl bg-teal-bg/50 hover:bg-teal-bg/60 transition-all duration-200 relative overflow-hidden">
+    <li className="group rounded-3xl bg-teal-bg/50 hover:bg-teal-bg/60 transition-all duration-200 relative overflow-hidden border border-teal-text/10">
       <Link
         to="/proposal/$id"
         params={{ id: proposal.id.toString() }}

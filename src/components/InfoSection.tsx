@@ -7,15 +7,15 @@ export default function InfoSection() {
   const stats = [
     {
       icon: <FaFireAlt className="text-gray-300 mr-2" />,
-      label: "5 Active Proposals",
+      label: "Propose Anything",
     },
     {
       icon: <BsPeopleFill className="text-gray-300 mr-2" />,
-      label: "1,247 Voters",
+      label: "Democracy in Action",
     },
     {
       icon: <SiBlockchaindotcom className="text-gray-300 mr-2" />,
-      label: "Decentralized",
+      label: "Powered by Web3",
     },
   ];
   return (
