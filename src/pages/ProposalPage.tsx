@@ -3,7 +3,7 @@ import { useParams } from "@tanstack/react-router"
 import { useReadContract } from 'wagmi'
 import { BALLOTBOX_ADDRESS, BALLOTBOX_ABI } from '../config/contract'
 import { isProposalOpen } from '../utils'
-import { fetchFromIPFS, isIPFSHashSync } from '../utils/ipfs'
+import { fetchFromIPFS, getIPFSHashFromBytes32 } from '../utils/ipfs'
 import { useVoting } from '../hooks/useVoting'
 import Navbar from '../components/Navbar'
 import ProposalContent from '../components/ProposalContent'
@@ -44,6 +44,8 @@ export default function ProposalPage() {
     }
   })
 
+  console.log('Contract Proposal:', contractProposal)
+
   // Process contract data and fetch IPFS content
   useEffect(() => {
     async function processProposal() {
@@ -63,14 +65,20 @@ export default function ProposalPage() {
       try {
         let details = ""
         
-        // If detailsHash is an IPFS hash, fetch the content
-        if (isIPFSHashSync(contract[9])) {
+        // Try to get the original IPFS hash from the bytes32 detailsHash
+        const originalIPFSHash = getIPFSHashFromBytes32(contract[9])
+        
+        if (originalIPFSHash) {
           try {
-            const ipfsContent = await fetchFromIPFS(contract[9])
+            console.log('Fetching IPFS content for hash:', originalIPFSHash)
+            const ipfsContent = await fetchFromIPFS(originalIPFSHash)
             details = ipfsContent || ""
+            console.log('Successfully fetched IPFS content:', details ? 'Content found' : 'No content')
           } catch (error) {
             console.error('Failed to fetch IPFS content:', error)
           }
+        } else {
+          console.log('No valid IPFS hash found in detailsHash:', contract[9])
         }
 
         const processedProposal: Proposal = {
@@ -156,10 +164,10 @@ export default function ProposalPage() {
 
       <main className="mx-auto max-w-6xl px-4 py-8">
         <div className="grid gap-6 md:grid-cols-[1fr,320px]">
-          {/* Left: proposal content */}
+          {/* Top: proposal content */}
           <ProposalContent proposal={proposal} />
 
-          {/* Right: actions + stats */}
+          {/* Bottom: actions + stats */}
           <aside className="space-y-2">
             <VotingCard
               isOpen={open}

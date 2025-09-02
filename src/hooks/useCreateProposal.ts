@@ -36,21 +36,44 @@ export function useCreateProposal() {
         const ipfsHash = await uploadToIPFS(args.details);
         console.log('Details uploaded to IPFS:', ipfsHash);
         
-        // Convert IPFS CID to bytes32 format
-        // For now, we'll create a simple hash from the CID
-        // In production, you might want to use a more sophisticated approach
-        const encoder = new TextEncoder();
-        const data = encoder.encode(ipfsHash);
-        const hashArray = new Uint8Array(32);
+        // Store the full IPFS hash as bytes32
+        // We'll encode it in a way that we can decode later
+        // For CIDv1 hashes starting with 'bafkrei', we'll store a prefix and hash
+        if (ipfsHash.startsWith('bafkrei')) {
+          // Extract the significant part of the hash for CIDv1
+          // This is a simplified approach - in production you'd want proper CID decoding
+          const hashPart = ipfsHash.slice(7); // Remove 'bafkrei' prefix
+          const encoder = new TextEncoder();
+          const data = encoder.encode(hashPart.slice(0, 28)); // Take first 28 chars to fit in bytes32
+          
+          // Pad to 32 bytes
+          const hashArray = new Uint8Array(32);
+          hashArray.set(data);
+          
+          // Convert to hex string
+          detailsHash = `0x${Array.from(hashArray)
+            .map(b => b.toString(16).padStart(2, '0'))
+            .join('')}` as `0x${string}`;
+        } else {
+          // For other hash formats, use the original approach
+          const encoder = new TextEncoder();
+          const data = encoder.encode(ipfsHash);
+          const hashArray = new Uint8Array(32);
+          
+          // Copy the data, truncating or padding as needed
+          const copyLength = Math.min(data.length, 32);
+          hashArray.set(data.slice(0, copyLength));
+          
+          // Convert to hex string
+          detailsHash = `0x${Array.from(hashArray)
+            .map(b => b.toString(16).padStart(2, '0'))
+            .join('')}` as `0x${string}`;
+        }
         
-        // Copy the data, truncating or padding as needed
-        const copyLength = Math.min(data.length, 32);
-        hashArray.set(data.slice(0, copyLength));
-        
-        // Convert to hex string
-        detailsHash = `0x${Array.from(hashArray)
-          .map(b => b.toString(16).padStart(2, '0'))
-          .join('')}` as `0x${string}`;
+        // Store the mapping in localStorage for retrieval
+        // This is a workaround since bytes32 can't store full IPFS hashes
+        localStorage.setItem(`ipfs_hash_${detailsHash}`, ipfsHash);
+        console.log('Stored IPFS mapping:', detailsHash, '->', ipfsHash);
           
       } catch (uploadError) {
         console.error('IPFS upload failed:', uploadError);

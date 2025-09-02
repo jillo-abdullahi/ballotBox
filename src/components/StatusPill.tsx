@@ -9,8 +9,8 @@ export default function StatusPill({
 }: StatusPillProps) {
   return (
     <span
-      className={`text-xs px-2 py-1 rounded-full border-none ${
-        isOpen ? "bg-blue-bg text-blue-text" : "bg-red-bg text-red-text"
+      className={`text-xs px-2 py-1 rounded-full border ${
+        isOpen ? "border-blue-text/10 bg-blue-bg text-blue-text" : "border-red-text/10 bg-red-bg text-red-text"
       } ${className}`}
     >
       {isOpen ? "Open" : "Closed"}

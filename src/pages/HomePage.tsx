@@ -4,7 +4,7 @@ import { BALLOTBOX_ADDRESS, BALLOTBOX_ABI } from '../config/contract'
 import Navbar from '../components/Navbar'
 import InfoSection from '../components/InfoSection'
 import ProposalsList from '../components/ProposalsList'
-import { fetchFromIPFS, isIPFSHashSync } from '../utils/ipfs'
+import { fetchFromIPFS, getIPFSHashFromBytes32 } from '../utils/ipfs'
 
 interface ContractProposal {
   id: bigint
@@ -71,10 +71,12 @@ export default function HomePage() {
           (contractProposals as readonly ContractProposal[]).map(async (proposal) => {
             let details = ""
             
-            // If detailsHash is an IPFS hash, fetch the content
-            if (isIPFSHashSync(proposal.detailsHash)) {
+            // Try to get the original IPFS hash from the bytes32 detailsHash
+            const originalIPFSHash = getIPFSHashFromBytes32(proposal.detailsHash)
+            
+            if (originalIPFSHash) {
               try {
-                const ipfsContent = await fetchFromIPFS(proposal.detailsHash)
+                const ipfsContent = await fetchFromIPFS(originalIPFSHash)
                 details = ipfsContent || ""
               } catch (error) {
                 console.error('Failed to fetch IPFS content:', error)

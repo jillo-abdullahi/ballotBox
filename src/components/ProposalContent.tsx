@@ -5,6 +5,7 @@ import { formatDate, isProposalOpen } from "../utils";
 import RelativeTime from "./RelativeTime";
 import InfoBox from "./InfoBox";
 import AuthorChip from "./AuthorChip";
+import StatusPill from "./StatusPill";
 
 interface ProposalContentProps {
   proposal: Proposal;
@@ -12,6 +13,9 @@ interface ProposalContentProps {
 
 export default function ProposalContent({ proposal }: ProposalContentProps) {
   const open = isProposalOpen(proposal.deadline);
+
+
+  console.log("Rendering ProposalContent for proposal:", proposal);
 
   return (
     <article className="space-y-2">
@@ -26,17 +30,7 @@ export default function ProposalContent({ proposal }: ProposalContentProps) {
             Proposal #{proposal.id}
           </span>
 
-          <div
-            className={`rounded-full px-3 py-1 flex items-center justify-between ml-2 ${
-              open ? "bg-blue-bg" : "bg-red-bg"
-            }`}
-          >
-            <span
-              className={`text-sm ${open ? "text-blue-text" : "text-red-text"}`}
-            >
-              {open ? "Open" : "Closed"}
-            </span>
-          </div>
+          <StatusPill isOpen={open} className="ml-2" />
         </div>
         <h1 className="text-3xl md:text-4xl font-bold text-neutral-300 mb-4">
           {proposal.title}
