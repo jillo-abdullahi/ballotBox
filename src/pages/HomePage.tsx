@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useReadContract, useAccount } from "wagmi";
 import { BALLOTBOX_ADDRESS, BALLOTBOX_ABI } from "../config/contract";
-import Navbar from "../components/Navbar";
 import InfoSection from "../components/InfoSection";
 import ProposalsList from "../components/ProposalsList";
 import ProposalsListSkeleton from "../components/ProposalsListSkeleton";
@@ -230,8 +229,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 w-full">
-      <Navbar />
-
       {/* Content with improved layout */}
       <main className="mx-auto max-w-6xl px-4 py-8 space-y-8">
         <InfoSection />

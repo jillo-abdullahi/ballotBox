@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useAccount } from "wagmi";
 import { FaArrowRight } from "react-icons/fa";
-import { Navbar, CustomConnectButton } from "../components";
+import { CustomConnectButton } from "../components";
 import ContractTransactionModal from "../components/ContractTransactionModal";
 import DatePicker from "../components/DatePicker";
 import TimePicker from "../components/TimePicker";
@@ -12,14 +12,14 @@ export default function CreateProposal() {
   const navigate = useNavigate();
   const { isConnected } = useAccount();
   const [showTransactionModal, setShowTransactionModal] = useState(false);
-  
+
   // Contract interaction hook
   const {
     createProposal,
     isPending,
     isConfirming,
     isConfirmed,
-    error: contractError
+    error: contractError,
   } = useCreateProposal();
 
   // Form state
@@ -33,7 +33,7 @@ export default function CreateProposal() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isFormValid || isPending || isConfirming) return;
-    
+
     // Show transaction modal instead of directly submitting
     setShowTransactionModal(true);
   };
@@ -45,7 +45,7 @@ export default function CreateProposal() {
         title: formData.title,
         description: formData.description,
         details: formData.details,
-        deadline: formData.deadline
+        deadline: formData.deadline,
       });
     } catch (error) {
       console.error("Failed to create proposal:", error);
@@ -80,8 +80,6 @@ export default function CreateProposal() {
   if (!isConnected) {
     return (
       <div className="min-h-screen bg-neutral-950 text-neutral-100">
-        <Navbar />
-
         <main className="mx-auto max-w-6xl px-4 py-8">
           <div className="mb-8 bg-blue-bg px-8 py-6 rounded-3xl">
             <h1 className="text-3xl md:text-4xl font-bold mb-2 text-blue-text">
@@ -111,14 +109,15 @@ export default function CreateProposal() {
                   />
                 </svg>
               </div>
-              
+
               <h2 className="text-2xl font-bold mb-4 text-blue-text">
                 Connect Your Wallet
               </h2>
-              
+
               <p className="text-neutral-300 mb-8 leading-relaxed">
-                You need to connect your wallet to create proposals. This ensures
-                that only verified users can submit proposals to the community.
+                You need to connect your wallet to create proposals. This
+                ensures that only verified users can submit proposals to the
+                community.
               </p>
 
               <div className="flex justify-center">
@@ -142,8 +141,6 @@ export default function CreateProposal() {
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100">
-      <Navbar />
-
       <main className="mx-auto max-w-6xl px-4 py-8">
         <div className="mb-8 bg-blue-bg px-8 py-6 rounded-3xl">
           <h1 className="text-3xl md:text-4xl font-bold mb-2 text-blue-text">
@@ -234,38 +231,48 @@ export default function CreateProposal() {
             </label>
             <div className="grid grid-cols-2 gap-3">
               <DatePicker
-                value={formData.deadline ? (formData.deadline.split('T')[0] || '') : ''}
+                value={
+                  formData.deadline ? formData.deadline.split("T")[0] || "" : ""
+                }
                 onChange={(date) => {
-                  const timePart = formData.deadline ? (formData.deadline.split('T')[1] || '12:00') : '12:00';
-                  setFormData(prev => ({
+                  const timePart = formData.deadline
+                    ? formData.deadline.split("T")[1] || "12:00"
+                    : "12:00";
+                  setFormData((prev) => ({
                     ...prev,
-                    deadline: date ? `${date}T${timePart}` : ''
+                    deadline: date ? `${date}T${timePart}` : "",
                   }));
                 }}
-                min={new Date().toISOString().split('T')[0]}
+                min={new Date().toISOString().split("T")[0]}
                 label="Date"
                 required
               />
               <TimePicker
-                value={formData.deadline ? (formData.deadline.split('T')[1] || '') : ''}
+                value={
+                  formData.deadline ? formData.deadline.split("T")[1] || "" : ""
+                }
                 onChange={(time) => {
-                  const datePart = formData.deadline ? formData.deadline.split('T')[0] : '';
+                  const datePart = formData.deadline
+                    ? formData.deadline.split("T")[0]
+                    : "";
                   if (datePart) {
-                    setFormData(prev => ({
+                    setFormData((prev) => ({
                       ...prev,
-                      deadline: `${datePart}T${time}`
+                      deadline: `${datePart}T${time}`,
                     }));
                   } else {
                     // If no date is set, we need a date first
-                    const today = new Date().toISOString().split('T')[0];
-                    setFormData(prev => ({
+                    const today = new Date().toISOString().split("T")[0];
+                    setFormData((prev) => ({
                       ...prev,
-                      deadline: `${today}T${time}`
+                      deadline: `${today}T${time}`,
                     }));
                   }
                 }}
                 label="Time"
-                required={!!(formData.deadline && formData.deadline.split('T')[0])}
+                required={
+                  !!(formData.deadline && formData.deadline.split("T")[0])
+                }
               />
             </div>
             <p className="text-xs text-neutral-400">
@@ -316,7 +323,9 @@ export default function CreateProposal() {
               disabled={!isFormValid || isPending || isConfirming}
               className="px-8 py-3 cursor-pointer bg-blue-text text-gray-900 rounded-xl hover:bg-blue-text disabled:opacity-80 disabled:cursor-not-allowed transition-colors font-medium flex-1 sm:flex-none flex items-center justify-center gap-2 group"
             >
-              <span>{isPending || isConfirming ? "Creating..." : "Create Proposal"}</span>
+              <span>
+                {isPending || isConfirming ? "Creating..." : "Create Proposal"}
+              </span>
               <FaArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
             </button>
           </div>

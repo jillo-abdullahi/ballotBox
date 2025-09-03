@@ -5,7 +5,6 @@ import { BALLOTBOX_ADDRESS, BALLOTBOX_ABI } from "../config/contract";
 import { isProposalOpen } from "../utils";
 import { fetchFromIPFS, getIPFSHashFromBytes32 } from "../utils/ipfs";
 import { useVoting } from "../hooks/useVoting";
-import Navbar from "../components/Navbar";
 import ProposalContent from "../components/ProposalContent";
 import VotingCard from "../components/VotingCard";
 import VotingStats from "../components/VotingStats";
@@ -95,7 +94,10 @@ export default function ProposalPage() {
             console.error("Failed to fetch IPFS content:", error);
           }
         } else {
-          console.error("No valid IPFS hash found in detailsHash:", contract[9]);
+          console.error(
+            "No valid IPFS hash found in detailsHash:",
+            contract[9]
+          );
         }
 
         const processedProposal: Proposal = {
@@ -130,21 +132,20 @@ export default function ProposalPage() {
     setPendingVote(null);
   }, [address]); // Reset when address changes
 
+  // Scroll to top when navigating to this page or when proposal ID changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [pid]); // Scroll to top when proposal ID changes
+
   // Show loading skeleton while fetching data
   if (isLoading || isContractLoading) {
-    return (
-      <>
-        <Navbar />
-        <ProposalSkeleton />
-      </>
-    );
+    return <ProposalSkeleton />;
   }
 
   // Show not found message only after we've determined the proposal doesn't exist
   if (proposalNotFound || !proposal) {
     return (
       <div className="min-h-screen bg-neutral-950 text-neutral-100">
-        <Navbar />
         <main className="mx-auto max-w-6xl px-4 py-8">
           <div className="rounded-2xl border border-neutral-800 bg-neutral-950/40 p-6">
             <p className="text-red-300">Proposal not found.</p>
@@ -175,8 +176,6 @@ export default function ProposalPage() {
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100">
-      <Navbar />
-
       <main className="mx-auto max-w-6xl px-4 py-8">
         <div className="grid gap-6 md:grid-cols-[1fr,320px]">
           {/* Top: proposal content */}
