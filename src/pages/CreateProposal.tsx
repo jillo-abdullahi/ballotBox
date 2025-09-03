@@ -20,6 +20,7 @@ export default function CreateProposal() {
     isConfirming,
     isConfirmed,
     error: contractError,
+    hash,
   } = useCreateProposal();
 
   // Form state
@@ -62,15 +63,9 @@ export default function CreateProposal() {
     }
   };
 
-  // Handle successful transaction confirmation
-  useEffect(() => {
-    if (isConfirmed) {
-      // Navigate back to home after successful creation
-      setTimeout(() => {
-        navigate({ to: "/" });
-      }, 2000); // Give user time to see success state
-    }
-  }, [isConfirmed, navigate]);
+  const handleViewProposals = () => {
+    navigate({ to: "/" });
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -429,6 +424,9 @@ export default function CreateProposal() {
           isConfirming={isConfirming}
           isConfirmed={isConfirmed}
           error={contractError}
+          transactionHash={hash}
+          proposalTitle={formData.title}
+          onViewProposals={handleViewProposals}
         />
       </main>
     </div>
