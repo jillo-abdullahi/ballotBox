@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useAccount } from "wagmi";
 import { FaArrowRight } from "react-icons/fa";
