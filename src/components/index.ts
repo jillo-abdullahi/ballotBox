@@ -13,7 +13,6 @@ export { default as ProposalCard } from "./ProposalCard";
 export { default as ProposalContent } from "./ProposalContent";
 export { default as ProposalsList } from "./ProposalsList";
 export { default as RelativeTime } from "./RelativeTime";
-export { default as SearchSection } from "./SearchSection";
 export { default as StatusPill } from "./StatusPill";
 export { default as TimePicker } from "./TimePicker";
 export { default as VotingCard } from "./VotingCard";

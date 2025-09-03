@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { useParams } from "@tanstack/react-router";
+import { useParams, useNavigate } from "@tanstack/react-router";
 import { useReadContract, useAccount } from "wagmi";
 import { BALLOTBOX_ADDRESS, BALLOTBOX_ABI } from "../config/contract";
 import { isProposalOpen } from "../utils";
 import { fetchFromIPFS, getIPFSHashFromBytes32 } from "../utils/ipfs";
 import { useVoting } from "../hooks/useVoting";
+import { FaSearch } from "react-icons/fa";
+import { MdOutlineError } from "react-icons/md";
 import ProposalContent from "../components/ProposalContent";
 import VotingCard from "../components/VotingCard";
 import VotingStats from "../components/VotingStats";
@@ -15,6 +17,7 @@ import type { Proposal } from "../types";
 export default function ProposalPage() {
   const { id } = useParams({ from: "/proposal/$id" });
   const pid = Number(id);
+  const navigate = useNavigate();
   const { address } = useAccount();
   const [proposal, setProposal] = useState<Proposal | null>(null);
   const [localVotes, setLocalVotes] = useState<{
@@ -142,8 +145,67 @@ export default function ProposalPage() {
     return (
       <div className="min-h-screen bg-neutral-950 text-neutral-100">
         <main className="mx-auto max-w-6xl px-4 py-8">
-          <div className="rounded-2xl border border-neutral-800 bg-neutral-950/40 p-6">
-            <p className="text-red-300">Proposal not found.</p>
+          {/* Header section with consistent styling */}
+          <div className="mb-8 bg-blue-bg px-8 py-6 rounded-3xl">
+            <h1 className="text-3xl md:text-4xl font-bold mb-2 text-blue-text">
+              Proposal Not Found
+            </h1>
+            <p className="text-blue-text text-lg">
+              The proposal you're looking for doesn't exist
+            </p>
+          </div>
+
+          {/* 404 Content */}
+          <div className="max-w-2xl mx-auto text-center">
+            <div className="rounded-2xl border border-neutral-800 bg-neutral-950/40 p-12">
+              {/* Error Icon */}
+              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-red-500/10 flex items-center justify-center">
+                <MdOutlineError className="w-10 h-10 text-red-400" />
+              </div>
+
+              {/* Error Message */}
+              <h2 className="text-2xl font-bold mb-4 text-neutral-100">
+                Proposal #{pid} Not Found
+              </h2>
+              <p className="text-neutral-400 mb-8 leading-relaxed">
+                This proposal might have been removed, or you might have entered
+                an incorrect proposal ID. The proposal you're looking for
+                doesn't exist in our database.
+              </p>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <button
+                  onClick={() => navigate({ to: "/" })}
+                  className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-text text-gray-900 rounded-xl hover:bg-blue-text/90 transition-colors font-medium cursor-pointer"
+                >
+                  <FaSearch className="w-4 h-4" />
+                  Browse Proposals
+                </button>
+              </div>
+
+              {/* Additional Help */}
+              <div className="mt-8 pt-6 border-t border-neutral-700/50">
+                <p className="text-sm text-neutral-500 mb-4">
+                  You might be interested in:
+                </p>
+                <div className="flex flex-wrap justify-center gap-2">
+                  <button
+                    onClick={() => navigate({ to: "/" })}
+                    className="cursor-pointer text-blue-text hover:text-blue-text/80 transition-colors text-sm underline"
+                  >
+                    Latest Proposals
+                  </button>
+                  <span className="text-neutral-600">•</span>
+                  <button
+                    onClick={() => navigate({ to: "/create" })}
+                    className="cursor-pointer text-blue-text hover:text-blue-text/80 transition-colors text-sm underline"
+                  >
+                    Create New Proposal
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </main>
       </div>
