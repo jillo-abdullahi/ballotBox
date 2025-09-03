@@ -168,7 +168,7 @@ export default function CreateProposal() {
               value={formData.title}
               onChange={handleChange}
               placeholder="e.g., Increase staking rewards to 8%"
-              className="w-full px-5 py-4 bg-blue-bg/50 border-none text-neutral-100 placeholder-neutral-400 rounded-xl hover:bg-blue-bg/70 focus:bg-blue-bg/20 focus:ring-2 focus:ring-blue-text/20 focus:outline-none transition-all duration-200"
+              className="w-full px-5 py-4 bg-blue-bg/50 border border-blue-bg/50 text-neutral-100 placeholder-neutral-400 rounded-xl hover:bg-blue-bg/70 focus:bg-blue-bg/20 focus:ring-2 focus:ring-blue-text/20 focus:outline-none transition-all duration-200"
               maxLength={100}
               required
             />
@@ -192,7 +192,7 @@ export default function CreateProposal() {
               onChange={handleChange}
               placeholder="Brief summary of your proposal (shown in proposal lists)"
               rows={3}
-              className="w-full px-5 py-4 bg-blue-bg/50 border-none text-neutral-100 placeholder-neutral-400 rounded-xl hover:bg-blue-bg/70 focus:bg-blue-bg/20 focus:ring-2 focus:ring-blue-text/20 focus:outline-none transition-all duration-200 resize-vertical"
+              className="w-full px-5 py-4 bg-blue-bg/50 border border-blue-bg/50 text-neutral-100 placeholder-neutral-400 rounded-xl hover:bg-blue-bg/70 focus:bg-blue-bg/20 focus:ring-2 focus:ring-blue-text/20 focus:outline-none transition-all duration-200 resize-vertical"
               maxLength={200}
               required
             />
@@ -216,7 +216,7 @@ export default function CreateProposal() {
               onChange={handleChange}
               placeholder="Provide comprehensive details, rationale, implementation plan, and any other relevant information"
               rows={8}
-              className="w-full px-5 py-4 bg-blue-bg/50 border-none text-neutral-100 placeholder-neutral-400 rounded-xl hover:bg-blue-bg/70 focus:bg-blue-bg/20 focus:ring-2 focus:ring-blue-text/20 focus:outline-none transition-all duration-200 resize-vertical"
+              className="w-full px-5 py-4 bg-blue-bg/50 border border-blue-bg/50 text-neutral-100 placeholder-neutral-400 rounded-xl hover:bg-blue-bg/70 focus:bg-blue-bg/20 focus:ring-2 focus:ring-blue-text/20 focus:outline-none transition-all duration-200 resize-vertical"
               maxLength={2000}
             />
             <p className="text-xs text-neutral-400">

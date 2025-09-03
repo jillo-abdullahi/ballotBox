@@ -136,7 +136,7 @@ export default function DatePicker({ value, onChange, min, label, required }: Da
         ref={buttonRef}
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-5 py-4 bg-blue-bg/50 border-none text-neutral-100 rounded-xl hover:bg-blue-bg/70 focus:bg-blue-bg/20 focus:ring-2 focus:ring-blue-text/20 focus:outline-none transition-all duration-200 flex items-center justify-between"
+        className="w-full px-5 py-4 bg-blue-bg/50 border border-blue-bg/50 text-neutral-100 rounded-xl hover:bg-blue-bg/70 focus:bg-blue-bg/20 focus:ring-2 focus:ring-blue-text/20 focus:outline-none transition-all duration-200 flex items-center justify-between"
       >
         <span className={selectedDate ? 'text-neutral-100' : 'text-neutral-400'}>
           {selectedDate ? formatDisplayDate(selectedDate) : 'Select date'}
