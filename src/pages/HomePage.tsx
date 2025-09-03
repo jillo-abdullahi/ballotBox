@@ -65,13 +65,13 @@ export default function HomePage() {
   const shouldLoadAll = !!debouncedSearchQuery.trim();
   const startIndex = shouldLoadAll 
     ? 0 
-    : Math.max(0, Number(totalCount || 0) - page * perPage);
+    : (page - 1) * perPage;
   const endIndex = shouldLoadAll 
     ? Number(totalCount || 0) 
-    : Math.max(0, Number(totalCount || 0) - (page - 1) * perPage);
+    : Math.min(Number(totalCount || 0), page * perPage);
   const loadCount = shouldLoadAll 
     ? Number(totalCount || 0) 
-    : Math.min(perPage, endIndex - startIndex);
+    : endIndex - startIndex;
 
   // Fetch proposals based on filter type and search state
   const { data: contractProposals, isLoading: isLoadingContractProposals } =

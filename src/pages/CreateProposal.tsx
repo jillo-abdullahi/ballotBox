@@ -30,9 +30,18 @@ export default function CreateProposal() {
     deadline: "",
   });
 
+  const [showValidationErrors, setShowValidationErrors] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isFormValid || isPending || isConfirming) return;
+
+    // Show validation errors if form is invalid
+    if (!isFormValid) {
+      setShowValidationErrors(true);
+      return;
+    }
+
+    if (isPending || isConfirming) return;
 
     // Show transaction modal instead of directly submitting
     setShowTransactionModal(true);
@@ -71,6 +80,41 @@ export default function CreateProposal() {
       ...prev,
       [name]: value,
     }));
+
+    // Clear validation errors when user starts typing
+    if (showValidationErrors) {
+      setShowValidationErrors(false);
+    }
+  };
+
+  // Validation helpers
+  const getFieldError = (fieldName: string) => {
+    if (!showValidationErrors) return "";
+
+    switch (fieldName) {
+      case "title":
+        return !formData.title.trim() ? "Title is required" : "";
+      case "description":
+        return !formData.description.trim()
+          ? "Short description is required"
+          : "";
+      case "deadline":
+        return !formData.deadline ? "Voting deadline is required" : "";
+      default:
+        return "";
+    }
+  };
+
+  const getAllErrors = () => {
+    if (!showValidationErrors) return [];
+
+    const errors = [];
+    if (!formData.title.trim()) errors.push("Title is required");
+    if (!formData.description.trim())
+      errors.push("Short description is required");
+    if (!formData.deadline) errors.push("Voting deadline is required");
+
+    return errors;
   };
 
   const isFormValid =
@@ -168,9 +212,12 @@ export default function CreateProposal() {
               value={formData.title}
               onChange={handleChange}
               placeholder="e.g., Increase staking rewards to 8%"
-              className="w-full px-5 py-4 bg-blue-bg/50 border border-blue-bg/50 text-neutral-100 placeholder-neutral-400 rounded-xl hover:bg-blue-bg/70 focus:bg-blue-bg/20 focus:ring-2 focus:ring-blue-text/20 focus:outline-none transition-all duration-200"
+              className={`w-full px-5 py-4 bg-blue-bg/50 border text-neutral-100 placeholder-neutral-400 rounded-xl hover:bg-blue-bg/70 focus:bg-blue-bg/20 focus:ring-2 focus:outline-none transition-all duration-200 ${
+                getFieldError("title")
+                  ? "border-red-500 focus:ring-red-500/20"
+                  : "border-blue-bg/50 focus:ring-blue-text/20"
+              }`}
               maxLength={100}
-              required
             />
             <p className="text-xs text-neutral-400">
               {formData.title.length}/100 characters
@@ -192,9 +239,12 @@ export default function CreateProposal() {
               onChange={handleChange}
               placeholder="Brief summary of your proposal (shown in proposal lists)"
               rows={3}
-              className="w-full px-5 py-4 bg-blue-bg/50 border border-blue-bg/50 text-neutral-100 placeholder-neutral-400 rounded-xl hover:bg-blue-bg/70 focus:bg-blue-bg/20 focus:ring-2 focus:ring-blue-text/20 focus:outline-none transition-all duration-200 resize-vertical"
+              className={`w-full px-5 py-4 bg-blue-bg/50 border text-neutral-100 placeholder-neutral-400 rounded-xl hover:bg-blue-bg/70 focus:bg-blue-bg/20 focus:ring-2 focus:outline-none transition-all duration-200 resize-vertical ${
+                getFieldError("description")
+                  ? "border-red-500 focus:ring-red-500/20"
+                  : "border-blue-bg/50 focus:ring-blue-text/20"
+              }`}
               maxLength={200}
-              required
             />
             <p className="text-xs text-neutral-400">
               {formData.description.length}/200 characters
@@ -229,7 +279,13 @@ export default function CreateProposal() {
             <label className="block text-md font-medium text-neutral-200">
               Voting Deadline *
             </label>
-            <div className="grid grid-cols-2 gap-3">
+            <div
+              className={`grid grid-cols-2 gap-3 p-3 rounded-xl border transition-all duration-200 ${
+                getFieldError("deadline")
+                  ? "border-red-500 bg-red-500/5"
+                  : "border-transparent"
+              }`}
+            >
               <DatePicker
                 value={
                   formData.deadline ? formData.deadline.split("T")[0] || "" : ""
@@ -242,10 +298,13 @@ export default function CreateProposal() {
                     ...prev,
                     deadline: date ? `${date}T${timePart}` : "",
                   }));
+                  // Clear validation errors when user selects a date
+                  if (showValidationErrors && date) {
+                    setShowValidationErrors(false);
+                  }
                 }}
                 min={new Date().toISOString().split("T")[0]}
                 label="Date"
-                required
               />
               <TimePicker
                 value={
@@ -270,9 +329,6 @@ export default function CreateProposal() {
                   }
                 }}
                 label="Time"
-                required={
-                  !!(formData.deadline && formData.deadline.split("T")[0])
-                }
               />
             </div>
             <p className="text-xs text-neutral-400">
@@ -309,6 +365,37 @@ export default function CreateProposal() {
             </div>
           )}
 
+          {/* Error Messages List */}
+          {showValidationErrors && getAllErrors().length > 0 && (
+            <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
+              <h4 className="text-red-400 font-medium mb-2 flex items-center gap-2">
+                <svg
+                  className="w-4 h-4"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                Please fix the following issues:
+              </h4>
+              <ul className="space-y-1">
+                {getAllErrors().map((error, index) => (
+                  <li
+                    key={index}
+                    className="text-red-300 text-sm flex items-center gap-2"
+                  >
+                    <span className="w-1 h-1 bg-red-400 rounded-full"></span>
+                    {error}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 pt-6">
             <button
@@ -320,7 +407,7 @@ export default function CreateProposal() {
             </button>
             <button
               type="submit"
-              disabled={!isFormValid || isPending || isConfirming}
+              disabled={isPending || isConfirming}
               className="px-8 py-3 cursor-pointer bg-blue-text text-gray-900 rounded-xl hover:bg-blue-text disabled:opacity-80 disabled:cursor-not-allowed transition-colors font-medium flex-1 sm:flex-none flex items-center justify-center gap-2 group"
             >
               <span>

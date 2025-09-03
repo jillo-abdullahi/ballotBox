@@ -15,7 +15,11 @@ export default function TimePicker({
   required,
 }: TimePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [hoursDropdownOpen, setHoursDropdownOpen] = useState(false);
+  const [minutesDropdownOpen, setMinutesDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const hoursRef = useRef<HTMLDivElement>(null);
+  const minutesRef = useRef<HTMLDivElement>(null);
 
   const [hours, setHours] = useState(() => {
     if (!value) return 12;
@@ -51,6 +55,18 @@ export default function TimePicker({
         !dropdownRef.current.contains(event.target as Node)
       ) {
         setIsOpen(false);
+      }
+      if (
+        hoursRef.current &&
+        !hoursRef.current.contains(event.target as Node)
+      ) {
+        setHoursDropdownOpen(false);
+      }
+      if (
+        minutesRef.current &&
+        !minutesRef.current.contains(event.target as Node)
+      ) {
+        setMinutesDropdownOpen(false);
       }
     };
 
@@ -117,47 +133,73 @@ export default function TimePicker({
         <div className="absolute bottom-full left-0 right-0 mb-2 bg-blue-bg border-none rounded-xl shadow-xl z-50 p-4 backdrop-blur-lg">
           <div className="flex items-center justify-center gap-4 mb-4">
             {/* Hours */}
-            <div className="flex flex-col">
+            <div className="flex flex-col relative" ref={hoursRef}>
               <label className="text-xs text-neutral-300 mb-2">Hour</label>
-              <div className="relative">
-                <select
-                  value={hours}
-                  onChange={(e) =>
-                    handleTimeChange(parseInt(e.target.value), minutes, period)
-                  }
-                  className="cursor-pointer bg-blue-text/10 text-neutral-100 rounded-lg pl-3 pr-8 py-2 border-none focus:border-blue-text focus:outline-none appearance-none w-full"
-                >
+              
+              {hoursDropdownOpen && (
+                <div className="absolute bottom-full left-0 right-0 mb-1 bg-blue-bg border border-blue-text/20 rounded-lg shadow-xl z-50 max-h-48 overflow-y-auto scrollbar-thin scrollbar-track-blue-bg scrollbar-thumb-blue-text/30 hover:scrollbar-thumb-blue-text/50">
                   {Array.from({ length: 12 }, (_, i) => i + 1).map((hour) => (
-                    <option key={hour} value={hour}>
+                    <button
+                      key={hour}
+                      type="button"
+                      onClick={() => {
+                        handleTimeChange(hour, minutes, period);
+                        setHoursDropdownOpen(false);
+                      }}
+                      className={`cursor-pointer w-full px-3 py-3 text-left hover:bg-blue-text/20 transition-colors border-b border-blue-text/10 last:border-b-0 ${
+                        hours === hour ? 'bg-blue-text/30 text-blue-text' : 'text-neutral-100'
+                      }`}
+                    >
                       {hour}
-                    </option>
+                    </button>
                   ))}
-                </select>
-                <FaChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-3 h-3 pointer-events-none" />
-              </div>
+                </div>
+              )}
+              
+              <button
+                type="button"
+                onClick={() => setHoursDropdownOpen(!hoursDropdownOpen)}
+                className="bg-blue-text/10 cursor-pointer text-neutral-100 rounded-lg pl-3 pr-4 py-2 border-none focus:border-blue-text focus:outline-none w-full text-left flex items-center justify-between hover:bg-blue-text/20 transition-colors"
+              >
+                <span>{hours}</span>
+                <FaChevronDown className={`text-neutral-400 w-3 h-3 ml-4 transition-transform ${hoursDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
             </div>
 
             <div className="text-neutral-400 text-xl font-bold mt-6">:</div>
 
             {/* Minutes */}
-            <div className="flex flex-col">
+            <div className="flex flex-col relative" ref={minutesRef}>
               <label className="text-xs text-neutral-300 mb-2">Minute</label>
-              <div className="relative">
-                <select
-                  value={minutes}
-                  onChange={(e) =>
-                    handleTimeChange(hours, parseInt(e.target.value), period)
-                  }
-                  className="cursor-pointer bg-blue-text/10 text-neutral-100 rounded-lg pl-3 pr-8 py-2 border-none focus:border-blue-text focus:outline-none appearance-none w-full"
-                >
+              
+              {minutesDropdownOpen && (
+                <div className="absolute bottom-full left-0 right-0 mb-1 bg-blue-bg border border-blue-text/20 rounded-lg shadow-xl z-50 max-h-48 overflow-y-auto scrollbar-thin scrollbar-track-blue-bg scrollbar-thumb-blue-text/30 hover:scrollbar-thumb-blue-text/50">
                   {Array.from({ length: 60 }, (_, i) => i).map((minute) => (
-                    <option key={minute} value={minute}>
+                    <button
+                      key={minute}
+                      type="button"
+                      onClick={() => {
+                        handleTimeChange(hours, minute, period);
+                        setMinutesDropdownOpen(false);
+                      }}
+                      className={`cursor-pointer w-full px-3 py-3 text-left hover:bg-blue-text/20 transition-colors border-b border-blue-text/10 last:border-b-0 ${
+                        minutes === minute ? 'bg-blue-text/30 text-blue-text' : 'text-neutral-100'
+                      }`}
+                    >
                       {minute.toString().padStart(2, "0")}
-                    </option>
+                    </button>
                   ))}
-                </select>
-                <FaChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-3 h-3 pointer-events-none" />
-              </div>
+                </div>
+              )}
+              
+              <button
+                type="button"
+                onClick={() => setMinutesDropdownOpen(!minutesDropdownOpen)}
+                className="cursor-pointer bg-blue-text/10 text-neutral-100 rounded-lg pl-3 pr-4 py-2 border-none focus:border-blue-text focus:outline-none w-full text-left flex items-center justify-between hover:bg-blue-text/20 transition-colors"
+              >
+                <span>{minutes.toString().padStart(2, "0")}</span>
+                <FaChevronDown className={`text-neutral-400 w-3 h-3 ml-4 transition-transform ${minutesDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
             </div>
 
             {/* AM/PM */}
