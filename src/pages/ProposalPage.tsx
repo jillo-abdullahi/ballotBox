@@ -132,11 +132,6 @@ export default function ProposalPage() {
     setPendingVote(null);
   }, [address]); // Reset when address changes
 
-  // Scroll to top when navigating to this page or when proposal ID changes
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [pid]); // Scroll to top when proposal ID changes
-
   // Show loading skeleton while fetching data
   if (isLoading || isContractLoading) {
     return <ProposalSkeleton />;

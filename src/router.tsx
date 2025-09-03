@@ -9,12 +9,14 @@ import ProposalPage from "./pages/ProposalPage";
 import CreateProposal from "./pages/CreateProposal";
 import NotFoundPage from "./pages/NotFoundPage";
 import { Navbar } from "./components";
+import { ScrollToTop } from "./components/ScrollToTop";
 
 // Create a root route
 const rootRoute = createRootRoute({
   component: () => (
     <>
       <Navbar />
+      <ScrollToTop />
       <Outlet />
     </>
   ),
