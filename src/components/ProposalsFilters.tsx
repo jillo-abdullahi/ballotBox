@@ -57,7 +57,7 @@ export default function ProposalsFilters({
       <div className="relative" ref={dropdownRef}>
         <button
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-          className="appearance-none bg-blue-bg/50 border border-blue-bg rounded-xl px-3 py-2 text-sm text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-text/50 focus:border-transparent cursor-pointer min-w-[140px] w-full sm:w-auto flex items-center justify-between hover:bg-blue-bg/60 transition-colors"
+          className="appearance-none bg-blue-bg/50 border border-blue-text/50 rounded-xl px-3 py-2 text-sm text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-text/50 focus:border-transparent cursor-pointer min-w-[140px] w-full sm:w-auto flex items-center justify-between hover:bg-blue-bg/60 transition-colors"
         >
           <span>{selectedOption?.label}</span>
 
@@ -70,7 +70,7 @@ export default function ProposalsFilters({
 
         {/* Dropdown Options */}
         {isDropdownOpen && (
-          <div className="absolute top-full mt-2 left-0 mt-1 w-full bg-blue-bg/50 backdrop-blur-lg border border-blue-bg rounded-xl shadow-lg z-10 overflow-hidden">
+          <div className="absolute top-full mt-2 left-0 mt-1 w-full bg-blue-bg/50 backdrop-blur-lg border border-blue-text/50 rounded-xl shadow-lg z-10 overflow-hidden">
             {filterOptions.map((option) => (
               <button
                 key={option.value}
@@ -118,7 +118,7 @@ export default function ProposalsFilters({
           placeholder="Search proposals..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full pl-10 pr-10 py-2 text-sm bg-blue-bg/50 border border-blue-bg rounded-xl text-neutral-100 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-text/50 focus:border-transparent"
+          className="w-full pl-10 pr-10 py-2 text-sm bg-blue-bg/50 border border-blue-text/50 rounded-xl text-neutral-100 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-text/50 focus:border-transparent"
         />
 
         {/* Clear search button */}

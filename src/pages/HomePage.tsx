@@ -61,11 +61,19 @@ export default function HomePage() {
     },
   });
 
-  // Calculate pagination for contract calls
-  const startIndex = Math.max(0, Number(totalCount || 0) - page * perPage);
-  const endIndex = Math.max(0, Number(totalCount || 0) - (page - 1) * perPage);
+  // Calculate pagination for contract calls - load all if searching, paginate if not
+  const shouldLoadAll = !!debouncedSearchQuery.trim();
+  const startIndex = shouldLoadAll 
+    ? 0 
+    : Math.max(0, Number(totalCount || 0) - page * perPage);
+  const endIndex = shouldLoadAll 
+    ? Number(totalCount || 0) 
+    : Math.max(0, Number(totalCount || 0) - (page - 1) * perPage);
+  const loadCount = shouldLoadAll 
+    ? Number(totalCount || 0) 
+    : Math.min(perPage, endIndex - startIndex);
 
-  // Fetch proposals for current page based on filter type
+  // Fetch proposals based on filter type and search state
   const { data: contractProposals, isLoading: isLoadingContractProposals } =
     useReadContract({
       address: BALLOTBOX_ADDRESS,
@@ -74,16 +82,9 @@ export default function HomePage() {
         filterType === "all" ? "getProposals" : "getProposalsByAuthor",
       args:
         filterType === "all"
-          ? [
-              BigInt(startIndex),
-              BigInt(Math.min(perPage, endIndex - startIndex)),
-            ]
+          ? [BigInt(startIndex), BigInt(loadCount)]
           : address
-          ? [
-              address,
-              BigInt(startIndex),
-              BigInt(Math.min(perPage, endIndex - startIndex)),
-            ]
+          ? [address, BigInt(startIndex), BigInt(loadCount)]
           : undefined,
       query: {
         enabled:
@@ -163,6 +164,7 @@ export default function HomePage() {
     }
 
     const query = debouncedSearchQuery.toLowerCase().trim();
+    
     return proposals.filter(
       (proposal) =>
         proposal.title.toLowerCase().includes(query) ||
@@ -173,10 +175,13 @@ export default function HomePage() {
     );
   }, [proposals, debouncedSearchQuery]);
 
-  // Reset to page 1 when filter changes
+  // Reset to page 1 when filter changes or search query changes
   useEffect(() => {
     setPage(1);
-    setIsLoadingProposals(true);
+    // Set loading state for filter type changes and search query changes
+    if (filterType || debouncedSearchQuery) {
+      setIsLoadingProposals(true);
+    }
   }, [filterType, debouncedSearchQuery]);
 
   // Reset to 'all' filter if wallet disconnects and user was on 'my' filter
@@ -224,8 +229,9 @@ export default function HomePage() {
     : pageCount;
 
   // Determine if we should show loading state
-  const isLoading =
-    isLoadingCount || isLoadingContractProposals || isLoadingProposals;
+  const isLoading = debouncedSearchQuery
+    ? (isLoadingCount || isLoadingContractProposals || isLoadingProposals) // Show loading when fetching all proposals for search
+    : (isLoadingCount || isLoadingContractProposals || isLoadingProposals); // Normal loading for pagination
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 w-full">
@@ -242,7 +248,7 @@ export default function HomePage() {
             </h2>
 
             {/* Filters */}
-            <div className="flex justify-end">
+            <div className="flex justify-start md:justify-end">
               <ProposalsFilters
                 filterType={filterType}
                 onFilterTypeChange={setFilterType}

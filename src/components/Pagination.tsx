@@ -10,7 +10,7 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
   return (
     <div className="mt-6 flex items-center justify-center gap-2">
       <button
-        className="rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm hover:bg-neutral-800 disabled:opacity-50"
+        className="cursor-pointer disabled:cursor-not-allowed rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm hover:bg-neutral-800 disabled:opacity-50"
         disabled={currentPage <= 1}
         onClick={() => onPageChange(clamp(currentPage - 1, 1, totalPages))}
       >
@@ -20,7 +20,7 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
         Page {currentPage} / {totalPages}
       </span>
       <button
-        className="rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm hover:bg-neutral-800 disabled:opacity-50"
+        className="cursor-pointer disabled:cursor-not-allowed rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm hover:bg-neutral-800 disabled:opacity-50"
         disabled={currentPage >= totalPages}
         onClick={() => onPageChange(clamp(currentPage + 1, 1, totalPages))}
       >
