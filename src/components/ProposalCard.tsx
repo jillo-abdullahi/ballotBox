@@ -37,7 +37,7 @@ export default function ProposalCard({ proposal }: ProposalCardProps) {
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
               <h3 className="font-semibold text-neutral-100 text-lg line-clamp-2">
-                {proposal.title} <StatusPill isOpen={open} className="ml-2" />
+                <span className="text-neutral-400">#{proposal.id}</span> {proposal.title} <StatusPill isOpen={open} className="ml-2" />
               </h3>
               <p className="mt-2 text-neutral-300 text-sm line-clamp-2 leading-relaxed">
                 {proposal.description}
