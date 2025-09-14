@@ -36,15 +36,15 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <nav className="flex items-center gap-3">
+        <nav className="flex items-center gap-2 sm:gap-3">
           {/* Back button for proposal pages */}
           {isProposalPage && (
             <Link
               to="/"
-              className="flex items-center cursor-pointer rounded-xl bg-blue-bg/50 px-5 py-3 text-sm text-blue-text hover:bg-blue-bg/70 focus:bg-blue-bg/20 focus:ring-2 focus:ring-blue-text/20 focus:outline-none transition-all duration-200 font-medium"
+              className="flex items-center cursor-pointer rounded-xl bg-blue-bg/50 px-3 py-2 sm:px-5 sm:py-3 text-sm text-blue-text hover:bg-blue-bg/70 focus:bg-blue-bg/20 focus:ring-2 focus:ring-blue-text/20 focus:outline-none transition-all duration-200 font-medium"
             >
-              <IoArrowBack size={16} className="inline mr-2" />
-              <span>Back</span>
+              <IoArrowBack size={16} className="inline sm:mr-2" />
+              <span className="hidden sm:inline">Back</span>
             </Link>
           )}
 
@@ -52,11 +52,11 @@ export default function Navbar() {
           {isProposalPage && (
             <button
               onClick={handleShare}
-              className="flex items-center cursor-pointer rounded-xl bg-blue-bg/50 px-5 py-3 text-sm text-blue-text hover:bg-blue-bg/70 focus:bg-blue-bg/20 focus:ring-2 focus:ring-blue-text/20 focus:outline-none transition-all duration-200 font-medium"
+              className="flex items-center cursor-pointer rounded-xl bg-blue-bg/50 px-3 py-2 sm:px-5 sm:py-3 text-sm text-blue-text hover:bg-blue-bg/70 focus:bg-blue-bg/20 focus:ring-2 focus:ring-blue-text/20 focus:outline-none transition-all duration-200 font-medium"
               title="Share proposal"
             >
-              <TbHeartShare size={16} className="inline mr-2" />
-              <span>Share</span>
+              <TbHeartShare size={16} className="inline sm:mr-2" />
+              <span className="hidden sm:inline">Share</span>
             </button>
           )}
 
@@ -64,9 +64,10 @@ export default function Navbar() {
           {isCreatePage && (
             <Link
               to="/"
-              className="rounded-xl bg-blue-bg/50 px-5 py-3 text-sm text-blue-text hover:bg-blue-bg/70 focus:bg-blue-bg/20 focus:ring-2 focus:ring-blue-text/20 focus:outline-none transition-all duration-200 font-medium"
+              className="rounded-xl bg-blue-bg/50 px-3 py-2 sm:px-5 sm:py-3 text-sm text-blue-text hover:bg-blue-bg/70 focus:bg-blue-bg/20 focus:ring-2 focus:ring-blue-text/20 focus:outline-none transition-all duration-200 font-medium"
             >
-              ← Cancel
+              <span className="hidden sm:inline">← Cancel</span>
+              <span className="sm:hidden">←</span>
             </Link>
           )}
 

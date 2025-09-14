@@ -31,9 +31,10 @@ export default function CustomConnectButton() {
                   <button
                     onClick={openConnectModal}
                     type="button"
-                    className="cursor-pointer rounded-xl bg-blue-text/10 border border-blue-text/20 px-5 py-3 text-sm text-blue-text hover:bg-blue-text/20 focus:bg-blue-text/5 focus:ring-2 focus:ring-blue-text/20 focus:outline-none transition-all duration-200 font-medium"
+                    className="cursor-pointer rounded-xl bg-blue-text/10 border border-blue-text/20 px-3 py-2 sm:px-5 sm:py-3 text-sm text-blue-text hover:bg-blue-text/20 focus:bg-blue-text/5 focus:ring-2 focus:ring-blue-text/20 focus:outline-none transition-all duration-200 font-medium"
                   >
-                    Connect Wallet
+                    <span className="hidden sm:inline">Connect Wallet</span>
+                    <span className="sm:hidden">Connect</span>
                   </button>
                 );
               }
@@ -43,19 +44,20 @@ export default function CustomConnectButton() {
                   <button
                     onClick={openChainModal}
                     type="button"
-                    className="cursor-pointer rounded-xl bg-red-text/10 border border-red-text/20 px-5 py-3 text-sm text-red-text hover:bg-red-text/20 focus:bg-red-text/5 focus:ring-2 focus:ring-red-text/20 focus:outline-none transition-all duration-200 font-medium"
+                    className="cursor-pointer rounded-xl bg-red-text/10 border border-red-text/20 px-3 py-2 sm:px-5 sm:py-3 text-sm text-red-text hover:bg-red-text/20 focus:bg-red-text/5 focus:ring-2 focus:ring-red-text/20 focus:outline-none transition-all duration-200 font-medium"
                   >
-                    Wrong network
+                    <span className="hidden sm:inline">Wrong network</span>
+                    <span className="sm:hidden">Wrong net</span>
                   </button>
                 );
               }
 
               return (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 sm:gap-2">
                   <button
                     onClick={openChainModal}
                     type="button"
-                    className="cursor-pointer rounded-xl bg-blue-text/10 border border-blue-text/20 px-3 py-3 text-sm text-blue-text hover:bg-blue-text/20 focus:bg-blue-text/5 focus:ring-2 focus:ring-blue-text/20 focus:outline-none transition-all duration-200 font-medium"
+                    className="cursor-pointer rounded-xl bg-blue-text/10 border border-blue-text/20 px-2 py-2 sm:px-3 sm:py-3 text-sm text-blue-text hover:bg-blue-text/20 focus:bg-blue-text/5 focus:ring-2 focus:ring-blue-text/20 focus:outline-none transition-all duration-200 font-medium"
                     title={chain.name}
                   >
                     {chain.hasIcon && (
@@ -82,13 +84,18 @@ export default function CustomConnectButton() {
                   <button
                     onClick={openAccountModal}
                     type="button"
-                    className="cursor-pointer rounded-xl bg-blue-text/10 border border-blue-text/20 px-5 py-3 text-sm text-blue-text hover:bg-blue-text/20 focus:bg-blue-text/5 focus:ring-2 focus:ring-blue-text/20 focus:outline-none transition-all duration-200 font-medium"
+                    className="cursor-pointer rounded-xl bg-blue-text/10 border border-blue-text/20 px-3 py-2 sm:px-5 sm:py-3 text-sm text-blue-text hover:bg-blue-text/20 focus:bg-blue-text/5 focus:ring-2 focus:ring-blue-text/20 focus:outline-none transition-all duration-200 font-medium truncate max-w-[120px] sm:max-w-none"
                     title="Connected wallet"
                   >
-                    {account.displayName}
-                    {account.displayBalance
-                      ? ` (${account.displayBalance})`
-                      : ""}
+                    <span className="hidden sm:inline">
+                      {account.displayName}
+                      {account.displayBalance
+                        ? ` (${account.displayBalance})`
+                        : ""}
+                    </span>
+                    <span className="sm:hidden">
+                      {account.displayName}
+                    </span>
                   </button>
                 </div>
               );
