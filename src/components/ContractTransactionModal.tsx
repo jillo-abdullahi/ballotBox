@@ -36,6 +36,7 @@ export default function ContractTransactionModal({
   onViewProposals,
 }: ContractTransactionModalProps) {
   const [hasStarted, setHasStarted] = useState(false);
+  const [showDelayWarning, setShowDelayWarning] = useState(false);
 
   useEffect(() => {
     if (isOpen && !hasStarted) {
@@ -48,6 +49,25 @@ export default function ContractTransactionModal({
       setHasStarted(true);
     }
   }, [isPending, isConfirming]);
+
+  // Show delay warning after 30 seconds of confirming
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    
+    if (isConfirming) {
+      timeoutId = setTimeout(() => {
+        setShowDelayWarning(true);
+      }, 30000); // 30 seconds
+    } else {
+      setShowDelayWarning(false);
+    }
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [isConfirming]);
 
   const handleConfirm = async () => {
     try {
@@ -64,6 +84,7 @@ export default function ContractTransactionModal({
     }
     onClose();
     setHasStarted(false);
+    setShowDelayWarning(false);
   };
 
   if (!isOpen) return null;
@@ -156,10 +177,28 @@ export default function ContractTransactionModal({
               <h3 className="text-xl font-bold text-teal-text mb-4">
                 Processing Transaction
               </h3>
-              <p className="text-neutral-300 mb-8 leading-relaxed">
+              <p className="text-neutral-300 mb-4 leading-relaxed">
                 Your transaction is being processed on the blockchain. Please
                 wait...
               </p>
+              {showDelayWarning && (
+                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 mb-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5">
+                      <svg fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h4 className="text-yellow-500 font-medium mb-1">Transaction Delayed</h4>
+                      <p className="text-yellow-200 text-sm leading-relaxed">
+                        Your transaction is taking longer than usual. This can happen during network congestion. 
+                        The transaction will complete automatically - please don't close this window or submit again.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </>
           )}
 
